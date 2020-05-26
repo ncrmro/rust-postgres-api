@@ -3,6 +3,7 @@
 
 extern crate config;
 #[macro_use]
+extern crate diesel;
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
