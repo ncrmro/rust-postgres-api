@@ -1,0 +1,7 @@
+[database]
+database_url= "postgres://pexp:pexp@db:5432/pexp"
+
+[auth]
+secret= "realworld"
+issuer= "realworld"
+expiry= 2400
