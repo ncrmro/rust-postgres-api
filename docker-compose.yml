@@ -6,6 +6,9 @@ services:
       context: .
       target: watcher
     command: cargo watch -x run
+    tty: true
+    environment:
+      TERM: xterm-256color
     volumes:
       - .:/app/
     ports:
