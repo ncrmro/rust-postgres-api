@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate log;
 
-use dotenv::dotenv;
 use listenfd::ListenFd;
 use std::env;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
@@ -27,7 +26,6 @@ async fn index() -> impl Responder {
 
 #[actix_rt::main]
 async fn main() -> Result<()> {
-    dotenv().ok();
     env_logger::init();
 
     // this will enable us to keep application running during recompile: systemfd --no-pid -s http::5000 -- cargo watch -x run

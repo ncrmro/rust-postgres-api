@@ -7,6 +7,8 @@ services:
       target: watcher
     command: cargo watch -x run
     tty: true
+    env_file:
+      - .env
     environment:
       TERM: xterm-256color
     volumes:
