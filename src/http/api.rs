@@ -20,6 +20,7 @@ pub fn main(settings: Settings) {
 pub fn rocket_init(settings: Settings) -> rocket::Rocket {
     let dbs = init_db(settings);
     let config = Config::build(Environment::Development)
+        .address("0.0.0.0")
         .extra("databases", dbs)
         .finalize()
         .unwrap();
