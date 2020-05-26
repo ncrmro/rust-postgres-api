@@ -5,7 +5,6 @@ services:
     build:
       context: .
       target: watcher
-    command: cargo watch -x run
     tty: true
     env_file:
       - .env
