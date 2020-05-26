@@ -2,7 +2,7 @@ use listenfd::ListenFd;
 use std::env;
 use actix_web::{get, App, HttpServer, Responder};
 use crate::settings::Settings;
-use sqlx::postgres::PgPool;
+use crate::db::init_db;
 use anyhow::Result;
 
 #[get("/")]
@@ -14,8 +14,7 @@ pub async fn server(settings: Settings) -> Result<()> {
     // this will enable us to keep application running during recompile: systemfd --no-pid -s http::5000 -- cargo watch -x run
     let mut listenfd = ListenFd::from_env();
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-    let db_pool = PgPool::new(&database_url).await?;
+    let db_pool = init_db(&settings.database).await?;
 
     let mut server = HttpServer::new(move || {
         App::new()
