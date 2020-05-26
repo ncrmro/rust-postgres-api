@@ -24,7 +24,7 @@ pub fn rocket_init(settings: Settings) -> rocket::Rocket {
         .unwrap();
 
     rocket::custom(config)
-    .manage(init_db(&settings.database))
-    .manage(settings)
-    .mount("/", routes![hello, authenticate])
+        .manage(init_db(&settings.database))
+        .manage(settings)
+        .mount("/", routes![hello, authenticate])
 }
