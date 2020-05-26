@@ -8,3 +8,5 @@ dc is aliased to `docker-compose`
 `dc run app diesel migration generate create_users`
 
 `dc run app diesel migration run`
+
+`dc run app cargo test`
