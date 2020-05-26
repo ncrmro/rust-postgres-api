@@ -18,12 +18,13 @@ pub fn main(settings: Settings) {
 }
 
 pub fn rocket_init(settings: Settings) -> rocket::Rocket {
-    let dbs = init_db(settings);
     let config = Config::build(Environment::Development)
         .address("0.0.0.0")
-        .extra("databases", dbs)
         .finalize()
         .unwrap();
 
-    rocket::custom(config).mount("/", routes![hello, authenticate])
+    rocket::custom(config)
+    .manage(init_db(&settings.database))
+    .manage(settings)
+    .mount("/", routes![hello, authenticate])
 }

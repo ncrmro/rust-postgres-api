@@ -1,12 +1,24 @@
-use crate::settings::Settings;
-use rocket::config::Value;
-use std::collections::HashMap;
+use rocket_contrib::databases::diesel::{r2d2, PgConnection};
+use crate::settings;
 
-pub fn init_db(settings: Settings) -> HashMap<&'static str, rocket::config::Value> {
-    let mut db_config = HashMap::new();
-    let mut dbs = HashMap::new();
+type ManagedPGConnection = r2d2::ConnectionManager<PgConnection>;
+type Pool = r2d2::Pool<ManagedPGConnection>;
 
-    db_config.insert("url", settings.database.database_url);
-    dbs.insert("my_db", Value::from(db_config));
-    return dbs;
+pub struct DbConn {
+    pub master: r2d2::PooledConnection<ManagedPGConnection>,
+}
+
+pub struct DbCollection {
+    pub db_conn_pool: Pool,
+}
+
+pub fn init_db(database_config: &settings::Database) -> DbCollection {
+    let db_manager =
+        r2d2::ConnectionManager::<PgConnection>::new(database_config.database_url.clone());
+    let db_pool =
+        r2d2::Pool::new(db_manager).expect("Failed to create db pool.");
+
+    DbCollection {
+        db_conn_pool: db_pool,
+    }
 }
