@@ -4,5 +4,6 @@ WORKDIR /app
 EXPOSE 8000
 
 RUN cargo install cargo-watch systemfd
+RUN cargo install --git https://github.com/launchbadge/sqlx.git cargo-sqlx
 
 CMD ["systemfd", "--no-pid", "-s", "http::0.0.0.0:8000", "--", "cargo", "watch", "-x", "run"]

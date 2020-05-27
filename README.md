@@ -1,12 +1,11 @@
 # Planet-Express
+dc is aliased to `docker-compose`
 
 ## Database Operations
 
-dc is aliased to `docker-compose`
-`dc run app diesel print-schema > src/db/schema.rs`
+`dc exec app sqlx mig add user`
+`dc exec app sqlx mig run`
 
-`dc run app diesel migration generate create_users`
+## Testing
 
-`dc run app diesel migration run`
-
-`dc run app cargo test`
+`dc exec app cargo test`
