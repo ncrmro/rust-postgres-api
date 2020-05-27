@@ -1,10 +1,10 @@
+use crate::db::init_db;
+use crate::settings::Settings;
+use crate::user;
+use actix_web::{get, App, HttpServer, Responder};
+use anyhow::Result;
 use listenfd::ListenFd;
 use std::env;
-use actix_web::{get, App, HttpServer, Responder};
-use crate::settings::Settings;
-use crate::db::init_db;
-use anyhow::Result;
-
 #[get("/")]
 async fn index() -> impl Responder {
     "Hello World"
@@ -18,8 +18,9 @@ pub async fn server(settings: Settings) -> Result<()> {
 
     let mut server = HttpServer::new(move || {
         App::new()
-        .data( db_pool.clone()  ) // pass database pool to application so we can access it inside handlers
-        .service(index)
+            .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
+            .service(index)
+            .configure(user::init) // init todo routes
     });
 
     server = match listenfd.take_tcp_listener(0)? {
@@ -33,4 +34,3 @@ pub async fn server(settings: Settings) -> Result<()> {
 
     Ok(server.run().await?)
 }
-

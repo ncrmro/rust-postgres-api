@@ -6,9 +6,10 @@ extern crate serde_derive;
 use crate::http::server;
 use anyhow::Result;
 
-mod settings;
-mod http;
 mod db;
+mod http;
+mod settings;
+mod user;
 
 use settings::Settings;
 
