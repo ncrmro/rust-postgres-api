@@ -1,1 +1,1 @@
-web: ROCKET_PORT=$PORT ROCKET_KEEP_ALIVE=0 ./target/release/planet-express
+web: APP_HTTP__PORT=$PORT ./target/release/planet-express

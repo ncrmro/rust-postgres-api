@@ -4,7 +4,7 @@ use crate::user;
 use actix_web::{get, App, HttpServer, Responder};
 use anyhow::Result;
 use listenfd::ListenFd;
-use std::env;
+
 #[get("/")]
 async fn index() -> impl Responder {
     "Hello World"
@@ -25,11 +25,7 @@ pub async fn server(settings: Settings) -> Result<()> {
 
     server = match listenfd.take_tcp_listener(0)? {
         Some(listener) => server.listen(listener)?,
-        None => {
-            let host = env::var("HOST").expect("HOST is not set in .env file");
-            let port = env::var("PORT").expect("PORT is not set in .env file");
-            server.bind(format!("{}:{}", host, port))?
-        }
+        None => server.bind(format!("{}:{}", settings.http.host, settings.http.port))?
     };
 
     Ok(server.run().await?)
