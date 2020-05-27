@@ -25,15 +25,17 @@ pub struct Settings {
     pub http: HTTP,
 }
 
-
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
         // Just simpler this way...
-        env::set_var("APP_DATABASE__DATABASE_URL", env::var("DATABASE_URL").unwrap());
+        env::set_var(
+            "APP_DATABASE__DATABASE_URL",
+            env::var("DATABASE_URL").unwrap(),
+        );
 
         let mut settings = Config::default();
 
-//         Start off by merging in the "default" configuration file
+        //         Start off by merging in the "default" configuration file
         settings.merge(File::with_name("config/default"))?;
 
         // Add in the current environment file
@@ -48,7 +50,9 @@ impl Settings {
 
         // Add in settings from the environment (with a prefix of APP)
         // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-        settings.merge(Environment::with_prefix("APP").separator("__")).unwrap();
+        settings
+            .merge(Environment::with_prefix("APP").separator("__"))
+            .unwrap();
 
         // You can deserialize (and thus freeze) the entire configuration as
         settings.try_into()

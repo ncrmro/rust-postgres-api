@@ -2,22 +2,21 @@ use actix_web::{Error, HttpRequest, HttpResponse, Responder};
 use anyhow::Result;
 use futures::future::{ready, Ready};
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool};
+use sqlx::PgPool;
 
-// this struct will use to receive user input
-#[derive(Serialize, Deserialize)]
+use paperclip::actix::Apiv2Schema;
+
+#[derive(Serialize, Deserialize, Apiv2Schema)]
 pub struct UserRequest {
     pub username: String,
 }
 
-// this struct will be used to represent database record
-#[derive(Serialize, FromRow)]
+#[derive(Serialize, Deserialize, Apiv2Schema)]
 pub struct User {
     pub id: i32,
     pub email: String,
 }
 
-// implementation of Actix Responder for User struct so we can return User from action handler
 impl Responder for User {
     type Error = Error;
     type Future = Ready<Result<HttpResponse, Error>>;

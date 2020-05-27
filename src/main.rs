@@ -9,7 +9,7 @@ use anyhow::Result;
 mod db;
 mod http;
 mod settings;
-// mod user;
+mod user;
 
 use settings::Settings;
 

@@ -1,17 +1,16 @@
 use crate::user::User;
-use actix_web::{get, web, HttpResponse, Responder};
+use paperclip::actix::web::{self, get, Json};
 use sqlx::PgPool;
 
-#[get("/viewer")]
-async fn find(username: String, db_pool: web::Data<PgPool>) -> impl Responder {
+async fn find(username: String, db_pool: web::Data<PgPool>) -> Result<Json<User>, ()> {
     let result = User::find_by_username(username, db_pool.get_ref()).await;
     match result {
-        Ok(todo) => HttpResponse::Ok().json(todo),
-        _ => HttpResponse::BadRequest().body("Todo not found"),
+        Ok(user) => Ok(Json(user)),
+        _ => Err(()),
     }
 }
 
 // function that will be called on new Application to configure routes for this module
 pub fn init(cfg: &mut web::ServiceConfig) {
-    cfg.service(find);
+    cfg.route("/viewer", get().to(find));
 }
