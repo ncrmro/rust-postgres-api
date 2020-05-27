@@ -1,13 +1,20 @@
 use crate::db::init_db;
 use crate::settings::Settings;
-use crate::user;
-use actix_web::{get, App, HttpServer, Responder};
+// use crate::user;
+use actix_web::{App, HttpServer};
+use paperclip::actix::{
+    // extension trait for actix_web::App and proc-macro attributes
+    OpenApiExt, api_v2_operation,
+    // use this instead of actix_web::web
+    web::{self},
+};
 use anyhow::Result;
 use listenfd::ListenFd;
 
-#[get("/")]
-async fn index() -> impl Responder {
-    "Hello World"
+
+#[api_v2_operation]
+async fn index() -> Result<String, () > {
+    Ok("Hello World".to_string())
 }
 
 pub async fn server(settings: Settings) -> Result<()> {
@@ -18,9 +25,13 @@ pub async fn server(settings: Settings) -> Result<()> {
 
     let mut server = HttpServer::new(move || {
         App::new()
+            // Record services and routes from this line.
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
-            .service(index)
-            .configure(user::init) // init todo routes
+            .wrap_api()
+            .service( web::resource("/").route(web::get().to(index)) )
+//             .configure(user::init) // init todo routes
+            .with_json_spec_at("/api/spec")
+            .build()
     });
 
     server = match listenfd.take_tcp_listener(0)? {
