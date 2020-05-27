@@ -1187,7 +1187,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "492158e732f2e2de81c592f0a2427e57e12cd3d59877378fe7af624b6bbe0ca1"
 dependencies = [
  "libc",
- "uuid",
+ "uuid 0.6.5",
  "winapi 0.3.8",
 ]
 
@@ -1948,6 +1948,7 @@ dependencies = [
  "base64 0.12.1",
  "bitflags",
  "byteorder",
+ "chrono",
  "crossbeam-queue",
  "crossbeam-utils",
  "futures-channel",
@@ -1966,6 +1967,7 @@ dependencies = [
  "sqlformat",
  "tokio",
  "url",
+ "uuid 0.8.1",
 ]
 
 [[package]]
@@ -2236,6 +2238,12 @@ checksum = "e1436e58182935dcd9ce0add9ea0b558e8a87befe01c1a301e6020aeb0876363"
 dependencies = [
  "cfg-if",
 ]
+
+[[package]]
+name = "uuid"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9fde2f6a4bea1d6e007c4ad38c6839fa71cbb63b6dbf5b595aa38dc9b1093c11"
 
 [[package]]
 name = "vcpkg"
