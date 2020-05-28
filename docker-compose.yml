@@ -1,6 +1,5 @@
 version: "3.4"
-services:
-  app:
+x-app: &app-template
     image: ncrmro/planet-express
     build:
       context: .
@@ -10,12 +9,26 @@ services:
       - .env
     environment:
       TERM: xterm-256color
+    depends_on:
+      - db
+
+services:
+  app:
+    <<: *app-template
     volumes:
       - .:/app/
       - cargo-cache:/usr/local/cargo/registry
       - target-cache:/app/target
     ports:
       - 8000:8000
+  app-migrations:
+    <<: *app-template
+    command: sqlx mig run
+    build:
+      context: .
+      target: base
+    volumes:
+      - ./migrations/:/app/migrations/
   db:
     image: postgres:10.12
     environment:
