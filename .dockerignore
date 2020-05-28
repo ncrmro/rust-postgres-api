@@ -1,3 +1,11 @@
 /target
 .pgdata
 .env
+.env.example
+.gitignore
+.pre-commit-config.yaml
+docker-compose.yml
+Dockerfile
+Procfile
+README.md
+tests
