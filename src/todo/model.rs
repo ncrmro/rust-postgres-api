@@ -4,16 +4,17 @@ use futures::future::{ready, Ready};
 use sqlx::{PgPool, FromRow, Row};
 use sqlx::postgres::PgRow;
 use anyhow::Result;
+use paperclip::actix::Apiv2Schema;
 
 // this struct will use to receive user input
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Apiv2Schema)]
 pub struct TodoRequest {
     pub description: String,
     pub done: bool
 }
 
 // this struct will be used to represent database record
-#[derive(Serialize, FromRow)]
+#[derive(Serialize, FromRow, Apiv2Schema)]
 pub struct Todo {
     pub id: i32,
     pub description: String,

@@ -1,12 +1,13 @@
 use crate::db::init_db;
 use crate::settings::Settings;
 use crate::user;
+use crate::todo;
 use actix_web::{App, HttpServer};
 use anyhow::Result;
 use listenfd::ListenFd;
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, resource},
+    web::{self},
     OpenApiExt,
 };
 
@@ -27,7 +28,9 @@ pub async fn server(settings: Settings) -> Result<()> {
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
             .wrap_api()
             .with_json_spec_at("/api/spec")
-            .service(resource("/").route(web::get().to(index)))
+            .route("/", web::get().to(index))
+            .route("/root2", web::get().to(index))
+            .configure(todo::init)
             .configure(user::init)
             .build()
     });

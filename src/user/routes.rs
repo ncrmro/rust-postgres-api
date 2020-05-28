@@ -12,5 +12,7 @@ async fn find(username: String, db_pool: web::Data<PgPool>) -> Result<Json<User>
 
 // function that will be called on new Application to configure routes for this module
 pub fn init(cfg: &mut web::ServiceConfig) {
-    cfg.route("/viewer", get().to(find));
+    cfg
+    .route("/viewer", get().to(find))
+    .route("/viewer2", get().to(find));
 }

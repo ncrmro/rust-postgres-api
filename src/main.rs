@@ -10,6 +10,7 @@ mod db;
 mod http;
 mod settings;
 mod user;
+mod todo;
 
 use settings::Settings;
 
