@@ -24,9 +24,6 @@ services:
   app-migrations:
     <<: *app-template
     command: sqlx mig run
-    build:
-      context: .
-      target: base
     volumes:
       - ./migrations/:/app/migrations/
   db:
