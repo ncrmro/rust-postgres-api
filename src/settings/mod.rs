@@ -27,11 +27,20 @@ pub struct Settings {
 
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
+        // HEROKU
+        // These env vars are automatically set by Heroku
+        // DATABASE_URL is also used by SQLx and is required a compile time to check SQL
         // Just simpler this way...
         env::set_var(
             "APP_DATABASE__DATABASE_URL",
-            env::var("DATABASE_URL").unwrap(),
+            env!("DATABASE_URL", "DATABASE_URL was not set"),
         );
+        // Same thing heroku mandates using the port at $PORT
+        match env::var("PORT") {
+            Ok(port) => env::set_var( "APP_HTTP__PORT", port),
+            Err(_e) => (),
+        };
+        // END HEROKU
 
         let mut settings = Config::default();
 
