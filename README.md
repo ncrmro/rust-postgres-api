@@ -25,4 +25,8 @@ we need to set our network to host and have a database live with our migrations.
 `d tag web registry.heroku.com/planetexpres/web`
 `d push registry.heroku.com/planetexpres/web`
 
+If you haven't added a database yet run
+`heroku addons:create heroku-postgresql:hobby-dev`
+
+Finally release
 `heroku container:release web`
