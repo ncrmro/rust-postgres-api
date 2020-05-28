@@ -13,8 +13,10 @@ ENV DATABASE_URL=postgres://pexp:pexp@localhost:5432/pexp
 RUN cargo install --path .
 
 FROM debian:buster-slim
-COPY ./migrations /migrations
-COPY ./config /config
+RUN useradd -m pexp
+USER pexp
 COPY --from=builder /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
+COPY ./config /config
+COPY ./migrations /migrations
 COPY --from=builder /usr/local/cargo/bin/planet-express /usr/local/bin/planet-express
 CMD ["planet-express"]
