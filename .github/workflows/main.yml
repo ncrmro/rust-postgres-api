@@ -1,13 +1,6 @@
 name: Docker Compose Actions Workflow
-on:
-  push:
-    # Sequence of patterns matched against refs/heads
-    branches:
-      - '*'
-  pull:
-    # Sequence of patterns matched against refs/heads
-    branches:
-      - '*'
+on: [push, pull]
+
 jobs:
   test:
     runs-on: ubuntu-latest
