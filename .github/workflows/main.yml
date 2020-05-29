@@ -8,6 +8,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Docker complains if .env not present
         run: touch .env
+      - name: Pull images
+        run: docker-compose pull
       - name: Bring up the database
         run: docker-compose up -d db
       - name: Run migrations
