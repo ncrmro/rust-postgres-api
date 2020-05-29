@@ -6,6 +6,8 @@
 - [x] Testing - Integration
 - [x] Docker Build
 - [x] Heroku Deployed Docker Container
+- [ ] Coverage
+- [ ] Sentry
 
 `d` and `dc` have been aliased to `docker` and `docker-compose`
 
