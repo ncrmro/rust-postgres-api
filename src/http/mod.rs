@@ -16,6 +16,14 @@ async fn index() -> Result<String, ()> {
     Ok("Hello World".to_string())
 }
 
+pub fn routes(cfg: &mut web::ServiceConfig) {
+    let v1 = web::scope("/v1")
+        .configure(todo::init)
+        .configure(user::init);
+
+    cfg.service(v1).route("/", web::get().to(index));
+}
+
 pub async fn server(settings: Settings) -> Result<()> {
     // this will enable us to keep application running during recompile: systemfd --no-pid -s http::5000 -- cargo watch -x run
     let mut listenfd = ListenFd::from_env();
@@ -28,10 +36,7 @@ pub async fn server(settings: Settings) -> Result<()> {
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
             .wrap_api()
             .with_json_spec_at("/api/spec")
-            .route("/", web::get().to(index))
-            .route("/root2", web::get().to(index))
-            .configure(todo::init)
-            .configure(user::init)
+            .configure(routes)
             .build()
     });
 
