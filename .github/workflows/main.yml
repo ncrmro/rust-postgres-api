@@ -14,6 +14,8 @@ jobs:
         run: docker-compose up -d db
       - name: Run migrations
         run:  docker-compose up app-migrations
+      - name: Run cargo check (compile packages except for final codegen)
+        run: docker-compose run app cargo check
       - name: Test
         run: docker-compose run app cargo test
 
