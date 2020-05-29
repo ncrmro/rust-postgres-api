@@ -6,6 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Docker complains if .env not present
+        run: touch .env
       - name: Build the stack
         run: docker-compose up -d
       - name: Test
