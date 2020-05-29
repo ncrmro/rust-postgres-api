@@ -1,7 +1,7 @@
 FROM rust:1.43 as base
 WORKDIR /app
 EXPOSE 8000
-RUN cargo install --git https://github.com/launchbadge/sqlx.git cargo-sqlx
+RUN cargo install --git https://github.com/launchbadge/sqlx.git --rev a9fb19b37da0e77fd891b8a2358733c563115a5c cargo-sqlx
 
 FROM base as watcher
 RUN cargo install cargo-watch systemfd
