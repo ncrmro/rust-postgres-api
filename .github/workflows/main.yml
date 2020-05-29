@@ -9,9 +9,9 @@ jobs:
       - name: Docker complains if .env not present
         run: touch .env
       - name: Build the stack
-        run: docker-compose up -d
+        run: docker-compose up -d db app-migrations
       - name: Test
-        run: docker exec app cargo test
+        run: docker-compose exec app cargo test
 
 # Build first layers..
 # Some how share target cache?.
