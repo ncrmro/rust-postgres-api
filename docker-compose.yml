@@ -11,6 +11,10 @@ x-app: &app-template
       TERM: xterm-256color
     depends_on:
       - db
+    volumes:
+      - .:/app/
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/app/target
 
 services:
   app:
@@ -21,6 +25,9 @@ services:
       - target-cache:/app/target
     ports:
       - 8000:8000
+  app-test:
+    <<: *app-template
+    command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
   app-migrations:
     <<: *app-template
     command: sqlx mig run
