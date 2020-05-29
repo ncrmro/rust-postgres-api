@@ -40,3 +40,34 @@ If you haven't added a database yet run
 
 Finally release
 `heroku container:release web`
+
+## Images
+We provide a few public images due to how like cargo-watcher and
+
+### SQLx 
+Used by watcher and the final docker image, contains SQLx CLI binary.
+```bash
+docker build \
+--target sqlx \
+--tag ncrmro/rust:sqlx .
+```
+
+`docker push ncrmro/rust:sqlx`
+
+### Watcher
+Has cargo-watch and sqlx binaries available.
+`docker build --target watcher --tag ncrmro/rust:watcher .`
+
+`docker push ncrmro/rust:watcher`
+
+### Built Image
+This image copies the SQLx binary and our compiled binary from the builder stage.
+THe builder stage uses
+
+```bash
+docker build \
+--network="host" \
+--target built \
+--build-arg SQLX_IMAGE=ncrmro/rust:sqlx .
+```
+
