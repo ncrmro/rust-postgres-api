@@ -12,8 +12,6 @@ RUN cargo install cargo-watch systemfd
 
 FROM ${RUST_IMAGE} as watcher
 WORKDIR /app
-RUN useradd -m pexp
-USER pexp
 COPY --from=watcher_build /usr/local/cargo/bin/systemfd /usr/local/bin/systemfd
 COPY --from=watcher_build /usr/local/cargo/bin/cargo-watch /usr/local/bin/cargo-watch
 COPY --from=sqlx /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
