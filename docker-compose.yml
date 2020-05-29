@@ -31,9 +31,9 @@ services:
     command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
   app-migrations:
     <<: *app-template
-    command: sqlx mig run
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; sqlx mig run'
     volumes:
-      - ./migrations/:/app/migrations/
+      - ./migrations/:/app/migrations/:rw
   db:
     image: postgres:10.12
     environment:
