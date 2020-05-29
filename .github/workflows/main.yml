@@ -11,7 +11,7 @@ jobs:
       - name: Build the stack
         run: docker-compose up -d db app-migrations
       - name: Test
-        run: docker-compose exec app cargo test
+        run: docker-compose run app cargo test
 
 # Build first layers..
 # Some how share target cache?.
