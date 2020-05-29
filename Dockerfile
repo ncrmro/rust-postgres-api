@@ -1,4 +1,5 @@
 ARG BUILDER_IMAGE=sqlx
+ARG WATCHER_IMAGE=sqlx
 
 FROM rust:1.43 as base
 WORKDIR /app
@@ -7,7 +8,7 @@ EXPOSE 8000
 FROM base as sqlx
 RUN cargo install --git https://github.com/launchbadge/sqlx.git --rev a9fb19b37da0e77fd891b8a2358733c563115a5c cargo-sqlx
 
-FROM base as watcher
+FROM ${WATCHER_IMAGE} as watcher
 RUN cargo install cargo-watch systemfd
 CMD ["systemfd", "--no-pid", "-s", "http::0.0.0.0:8000", "--", "cargo", "watch", "--watch", "src", "--exec", "run"]
 
