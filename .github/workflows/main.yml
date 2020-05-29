@@ -4,6 +4,10 @@ on:
     # Sequence of patterns matched against refs/heads
     branches:
       - '*'
+  pull:
+    # Sequence of patterns matched against refs/heads
+    branches:
+      - '*'
 jobs:
   test:
     runs-on: ubuntu-latest
