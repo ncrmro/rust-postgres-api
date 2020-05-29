@@ -5,7 +5,7 @@ RUN cargo install --git https://github.com/launchbadge/sqlx.git cargo-sqlx
 
 FROM base as watcher
 RUN cargo install cargo-watch systemfd
-CMD ["systemfd", "--no-pid", "-s", "http::0.0.0.0:8000", "--", "cargo", "watch", "--exec", "run"]
+CMD ["systemfd", "--no-pid", "-s", "http::0.0.0.0:8000", "--", "cargo", "watch", "--watch", "src", "--exec", "run"]
 
 FROM base as builder
 COPY . /app
