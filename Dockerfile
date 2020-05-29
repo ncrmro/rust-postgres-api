@@ -4,8 +4,11 @@ ARG SQLX_IMAGE=sqlx
 
 ###
 # Development
-FROM ${RUST_IMAGE} as sqlx
+FROM ${RUST_IMAGE} as sqlx_build
 RUN cargo install --git https://github.com/launchbadge/sqlx.git --rev a9fb19b37da0e77fd891b8a2358733c563115a5c cargo-sqlx
+
+FROM ${RUST_IMAGE} as sqlx
+COPY --from=sqlx_build /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
 
 FROM ${RUST_IMAGE} as watcher_build
 RUN cargo install cargo-watch systemfd
