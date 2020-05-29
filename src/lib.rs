@@ -4,14 +4,14 @@ extern crate log;
 extern crate serde_derive;
 
 mod db;
-mod http;
+pub mod http;
 mod settings;
-mod user;
 mod todo;
+mod user;
 
-use settings::Settings;
-use http::server;
 use anyhow::Result;
+use http::server;
+use settings::Settings;
 
 #[actix_rt::main]
 pub async fn init() -> Result<()> {

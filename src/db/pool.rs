@@ -1,8 +1,10 @@
 use crate::settings;
 use anyhow::Result;
-use sqlx::postgres::PgConnection;
-use sqlx::postgres::PgPool;
-use sqlx::{error, Pool};
+use sqlx::{
+    error,
+    postgres::{PgConnection, PgPool},
+    Pool,
+};
 
 pub async fn init_db(
     database_config: &settings::Database,

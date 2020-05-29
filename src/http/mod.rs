@@ -1,7 +1,7 @@
 use crate::db::init_db;
 use crate::settings::Settings;
-use crate::user;
 use crate::todo;
+use crate::user;
 use actix_web::{App, HttpServer};
 use anyhow::Result;
 use listenfd::ListenFd;

@@ -37,7 +37,7 @@ impl Settings {
         );
         // Same thing heroku mandates using the port at $PORT
         match env::var("PORT") {
-            Ok(port) => env::set_var( "APP_HTTP__PORT", port),
+            Ok(port) => env::set_var("APP_HTTP__PORT", port),
             Err(_e) => (),
         };
         // END HEROKU
