@@ -3,9 +3,9 @@ extern crate log;
 #[macro_use]
 extern crate serde_derive;
 
-mod db;
+pub mod db;
 pub mod http;
-mod settings;
+pub mod settings;
 mod todo;
 mod user;
 
