@@ -21,7 +21,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .configure(todo::init)
         .configure(user::init);
 
-    cfg.service(v1).route("/", web::get().to(index));
+    cfg.route("/", web::get().to(index)).service(v1);
 }
 
 pub async fn server(settings: Settings) -> Result<()> {
