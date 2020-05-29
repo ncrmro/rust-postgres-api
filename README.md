@@ -1,5 +1,13 @@
 # Planet-Express
-dc is aliased to `docker-compose`
+
+### TODO
+
+- [ ] Testing - Unit
+- [x] Testing - Integration
+- [x] Docker Build
+- [x] Heroku Deployed Docker Container
+
+`d` and `dc` have been aliased to `docker` and `docker-compose`
 
 ## Database Operations
 Creating a new migration
