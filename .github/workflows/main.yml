@@ -30,16 +30,19 @@ jobs:
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
-#      - name: Docker complains if .env not present
-#        run: touch .env
-#      - name: Bring up the database and run migrations.
-#        run: docker-compose up -d db && docker-compose up app-migrations
-#      - name: Compile binary
-#        run: docker-compose run app cargo build --release
-#      - name: Build release image
-#        run: docker build --tag registry.heroku.com/planetexpres/web .
       - name: Set up Heroku
         run: sudo apt update && sudo apt install curl -y && sudo curl https://cli-assets.heroku.com/install.sh | sh
-      - name: Sign into Heroku
-        run: heroku apps
-
+      - name: Sign into heroku container registry
+        run: heroku container:login
+      - name: Docker complains if .env not present
+        run: touch .env
+      - name: Bring up the database and run migrations.
+        run: docker-compose up -d db && docker-compose up app-migrations
+      - name: Compile binary
+        run: docker-compose run app cargo build --release
+      - name: Build release image
+        run: docker build --tag registry.heroku.com/planetexpres/web .
+      - name: Push release image
+        run: docker push registry.heroku.com/planetexpres/web
+      - name: Release new image
+        run: heroku container:release web
