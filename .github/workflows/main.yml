@@ -14,22 +14,38 @@ jobs:
         run: touch .env
       - name: Pull images
         run: docker-compose pull
-      - name: Bring up the database
-        run: docker-compose up -d db
-      - name: Run migrations
-        run:  docker-compose up app-migrations
+      - name: Bring up the database and run migrations.
+        run: docker-compose up -d db && docker-compose up app-migrations
       - name: Test
         run: docker-compose run app cargo test
-      - name: whoami
-        run: whoami
-      - name: LS LA
-        run: ls -la target
-      - name: LS LA
-        run: ls -la target/.cache
-      - name: LS LA
-        run: ls -la target/.cache/cargo
-#      - name: Compile final binary
+      - name: Chown cache files
+        run: sudo chown -R "$(whoami)" ./target
+#  build:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/cache@v2
+#        with:
+#          path: target
+#          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+#      - name: Docker complains if .env not present
+#        run: touch .env
+#      - name: Bring up the database and run migrations.
+#        run: docker-compose up -d db && docker-compose up app-migrations
+#      - name: Compile binary
 #        run: docker-compose run app cargo build --release
-#      - name: Build final release
+#      - name: Build release image
 #        run: docker build --tag registry.heroku.com/planetexpres/web .
+#      - name: Set up Heroku
+#        run: apt update && apt install curl -y && curl https://cli-assets.heroku.com/install.sh | sh
+#      - name: Sign into Heroku
+#        run: >
+#          cat >~/.netrc <<EOF
+#          machine api.heroku.com
+#              login ${email}
+#              password ${api_key}
+#          machine git.heroku.com
+#              login ${email}
+#              password ${api_key}
+#          EOF
 
