@@ -37,7 +37,7 @@ jobs:
 #      - name: Build release image
 #        run: docker build --tag registry.heroku.com/planetexpres/web .
       - name: Set up Heroku
-        run: apt update && apt install curl -y && curl https://cli-assets.heroku.com/install.sh | sh
+        run: sudo apt update && sudo apt install curl -y && sudo curl https://cli-assets.heroku.com/install.sh | sh
       - name: Sign into Heroku
         run: >
           cat >~/.netrc <<EOF
