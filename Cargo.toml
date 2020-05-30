@@ -22,4 +22,5 @@ env_logger = "0.7.1"
 log = "0.4.8"
 anyhow = "1.0.28"
 paperclip = { git = "https://github.com/wafflespeanut/paperclip", features = ["actix"] }
+fancy-regex = "0.3.5"
 

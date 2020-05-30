@@ -1,31 +1,31 @@
 version: "3.4"
 x-app: &app-template
-    image: ncrmro/planet-express
-    build:
-      context: .
-      target: watcher
+    image: ncrmro/rust:watcher
     tty: true
     env_file:
       - .env
     environment:
       TERM: xterm-256color
+      DATABASE_URL: postgres://pexp:pexp@db:5432/pexp
+      CARGO_HOME: /app/target/.cache/cargo
     depends_on:
       - db
+    volumes:
+      - .:/app/
 
 services:
   app:
     <<: *app-template
-    volumes:
-      - .:/app/
-      - cargo-cache:/usr/local/cargo/registry
-      - target-cache:/app/target
     ports:
       - 8000:8000
+  app-test:
+    <<: *app-template
+    command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
   app-migrations:
     <<: *app-template
-    command: sqlx mig run
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 3; done; sqlx mig run'
     volumes:
-      - ./migrations/:/app/migrations/
+      - ./migrations/:/app/migrations/:rw
   db:
     image: postgres:10.12
     environment:
@@ -39,5 +39,3 @@ services:
 
 volumes:
   pgdata:
-  cargo-cache:
-  target-cache:
