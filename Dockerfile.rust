@@ -1,0 +1,30 @@
+ARG RUST_IMAGE=rust:1.43
+ARG BUILT_IMAGE=debian:buster-slim
+
+###
+# Development
+FROM ${RUST_IMAGE} as sqlx_build
+RUN cargo install --git https://github.com/launchbadge/sqlx.git --rev a9fb19b37da0e77fd891b8a2358733c563115a5c cargo-sqlx
+
+FROM ${RUST_IMAGE} as sqlx
+COPY --from=sqlx_build /usr/local/cargo/bin/sqlx /usr/local/bin/sqlx
+
+FROM ${RUST_IMAGE} as watcher_build
+ARG SYSTEMFD_VERS=0.3.0
+RUN cargo install --version ${SYSTEMFD_VERS} systemfd
+
+ARG SCCACHE_VERS=0.2.13
+ARG CARGO_WATCH_VERS=v7.3.0
+
+ADD https://github.com/mozilla/sccache/releases/download/${SCCACHE_VERS}/sccache-${SCCACHE_VERS}-x86_64-unknown-linux-musl.tar.gz /tmp/sccache.tar.gz
+ADD https://github.com/passcod/cargo-watch/releases/download/${CARGO_WATCH_VERS}/cargo-watch-${CARGO_WATCH_VERS}-x86_64-unknown-linux-musl.tar.xz /tmp/cargo-watch.tar.xz
+
+RUN tar -xzf /tmp/sccache.tar.gz -C /tmp/ && mv /tmp/sccache-${SCCACHE_VERS}-x86_64-unknown-linux-musl/sccache /usr/local/cargo/bin/sccache
+RUN tar -xf /tmp/cargo-watch.tar.xz -C /tmp/ && mv /tmp/cargo-watch-${CARGO_WATCH_VERS}-x86_64-unknown-linux-musl/cargo-watch /usr/local/cargo/bin/cargo-watch
+
+FROM ${RUST_IMAGE} as watcher
+WORKDIR /app
+COPY --from=watcher_build /usr/local/cargo/bin/systemfd /usr/local/bin/systemfd
+COPY --from=watcher_build /usr/local/cargo/bin/cargo-watch /usr/local/bin/cargo-watch
+COPY --from=sqlx /usr/local/bin/sqlx /usr/local/bin/sqlx
+CMD ["systemfd", "--no-pid", "-s", "http::0.0.0.0:8000", "--", "cargo", "watch", "--watch", "src", "--exec", "run"]
