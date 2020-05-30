@@ -23,7 +23,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      HEROKU_APP: planetexpres
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      IMAGE_BASE: registry.heroku.com/planetexpres
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -43,7 +45,7 @@ jobs:
       - name: Compile binary
         run: docker-compose run app cargo build --release
       - name: Build release image
-        run: docker build --tag registry.heroku.com/planetexpres/web .
+        run: docker build --tag web . && docker tag web $IMAGE_BASE/web
       - name: Push release image
         run: docker push registry.heroku.com/planetexpres/web
       - name: Release new image
