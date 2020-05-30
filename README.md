@@ -1,6 +1,6 @@
 # Planet-Express
 
-### TODO
+## TODO
 
 - [ ] Testing - Unit
 - [x] Testing - Integration
@@ -49,25 +49,22 @@ Used by watcher and the final docker image, contains SQLx CLI binary.
 ```bash
 docker build \
 --target sqlx \
---tag ncrmro/rust:sqlx .
+--tag ncrmro/rust:sqlx -f Dockerfile.rust .
 ```
 
 `docker push ncrmro/rust:sqlx`
 
 ### Watcher
 Has cargo-watch and sqlx binaries available.
-`docker build --target watcher --tag ncrmro/rust:watcher .`
+`docker build --target watcher --tag ncrmro/rust:watcher -f Dockerfile.rust .`
 
 `docker push ncrmro/rust:watcher`
 
 ### Built Image
-This image copies the SQLx binary and our compiled binary from the builder stage.
-THe builder stage uses
+To save time let the precached compose container build the image and
+copy binary directly from volume.
 
 ```bash
-docker build \
---network="host" \
---target built \
---build-arg SQLX_IMAGE=ncrmro/rust:sqlx .
+docker build --target built
 ```
 
