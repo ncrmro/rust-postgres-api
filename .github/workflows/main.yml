@@ -51,4 +51,4 @@ jobs:
       - name: Release new image
         run: heroku container:release web
       - name: Run migrations
-        run: heroku run migrations
+        run: heroku run bash -c "cd / && sqlx mig run"
