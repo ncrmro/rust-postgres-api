@@ -6,6 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker complains if .env not present
         run: touch .env
       - name: Pull images
@@ -18,6 +22,8 @@ jobs:
         run: docker-compose run app cargo check
       - name: Test
         run: docker-compose run app cargo test
+      - name: Compile final binary
+        run: docker-compose run app cargo build --release
+      - name: Build final release
+        run: docker build --tag registry.heroku.com/planetexpres/web .
 
-# Build first layers..
-# Some how share target cache?.
