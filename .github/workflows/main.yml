@@ -20,8 +20,14 @@ jobs:
         run:  docker-compose up app-migrations
       - name: Test
         run: docker-compose run app cargo test
-      - name: Compile final binary
-        run: docker-compose run app cargo build --release
-      - name: Build final release
-        run: docker build --tag registry.heroku.com/planetexpres/web .
+      - name: LS LA
+        run: ls -la target
+      - name: LS LA
+        run: ls -la target/.cache
+      - name: LS LA
+        run: ls -la target/.cache/cargo
+#      - name: Compile final binary
+#        run: docker-compose run app cargo build --release
+#      - name: Build final release
+#        run: docker build --tag registry.heroku.com/planetexpres/web .
 
