@@ -1,5 +1,24 @@
 use fancy_regex::Regex;
-use sqlx::{error, PgConnection, PgPool, Pool};
+use sqlx::{PgConnection, PgPool, Pool};
+use std::fs;
+
+async fn migrations(connection: Pool<PgConnection>) {
+    let mut paths: Vec<_> = fs::read_dir("migrations")
+        .unwrap()
+        .map(|r| r.unwrap())
+        .collect();
+
+    paths.sort_by_key(|dir| dir.path());
+    for path in paths {
+        let full_path = format!("{}", path.path().display());
+        let contents = fs::read_to_string(full_path).unwrap();
+
+        sqlx::query(contents.as_ref())
+            .execute(&connection)
+            .await
+            .unwrap();
+    }
+}
 
 pub async fn init(settings: planet_express::settings::Settings) -> Pool<PgConnection> {
     let db_pool = planet_express::db::init_db(&settings.database)
@@ -33,7 +52,9 @@ pub async fn init(settings: planet_express::settings::Settings) -> Pool<PgConnec
         .unwrap();
     db_pool.close().await;
 
-    PgPool::new(format!("{}_test", db_name).as_ref())
-        .await
-        .unwrap()
+    let test_db_url = format!("{}_test", settings.database.database_url);
+    let test_connection = PgPool::new(&test_db_url).await.unwrap();
+
+    migrations(test_connection.clone()).await;
+    test_connection
 }
