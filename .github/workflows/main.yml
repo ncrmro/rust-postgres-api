@@ -2,26 +2,27 @@ name: Docker Compose Actions Workflow
 on: [push, pull_request]
 
 jobs:
-#  test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: actions/cache@v2
-#        with:
-#          path: target
-#          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-#      - name: Docker complains if .env not present
-#        run: touch .env
-#      - name: Pull images
-#        run: docker-compose pull
-#      - name: Bring up the database and run migrations.
-#        run: docker-compose up -d db && docker-compose up app-migrations
-#      - name: Test
-#        run: docker-compose run app cargo test
-#      - name: Chown cache files
-#        run: sudo chown -R "$(whoami)" ./target
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Docker complains if .env not present
+        run: touch .env
+      - name: Pull images
+        run: docker-compose pull
+      - name: Bring up the database and run migrations.
+        run: docker-compose up -d db && docker-compose up app-migrations
+      - name: Test
+        run: docker-compose run app cargo test
+      - name: Chown cache files
+        run: sudo chown -R "$(whoami)" ./target
   build:
     runs-on: ubuntu-latest
+     if: ${{ github.github.ref == 'master' }}
     env:
       HEROKU_APP: planetexpres
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
