@@ -10,25 +10,20 @@ x-app: &app-template
     environment:
       TERM: xterm-256color
       DATABASE_URL: postgres://pexp:pexp@db:5432/pexp
+      CARGO_HOME: /app/target/.cache/cargo
     depends_on:
       - db
     volumes:
       - .:/app/
-      - cargo-cache:/usr/local/cargo/registry
-      - target-cache:/app/target
 
 services:
   app:
     <<: *app-template
-    volumes:
-      - .:/app/
-      - cargo-cache:/usr/local/cargo/registry
-      - target-cache:/app/target
     ports:
       - 8000:8000
   app-test:
     <<: *app-template
-    command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
+    command: sccache cargo test
   app-migrations:
     <<: *app-template
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; sqlx mig run'
@@ -47,5 +42,3 @@ services:
 
 volumes:
   pgdata:
-  cargo-cache:
-  target-cache:
