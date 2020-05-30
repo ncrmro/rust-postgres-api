@@ -1,21 +1,24 @@
 name: Docker Compose Actions Workflow
 on: [push, pull_request]
 
+docker_shared_steps: &docker_shared_steps
+  - uses: actions/checkout@v2
+  - uses: actions/cache@v2
+    with:
+      path: target
+      key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+  - name: Docker complains if .env not present
+    run: touch .env
+  - name: Pull images
+    run: docker-compose pull
+  - name: Bring up the database and run migrations.
+    run: docker-compose up -d db && docker-compose up app-migrations
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Docker complains if .env not present
-        run: touch .env
-      - name: Pull images
-        run: docker-compose pull
-      - name: Bring up the database and run migrations.
-        run: docker-compose up -d db && docker-compose up app-migrations
+      <<: *docker_shared_steps
       - name: Test
         run: docker-compose run app cargo test
       - name: Chown cache files
