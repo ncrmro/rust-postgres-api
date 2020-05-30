@@ -22,7 +22,7 @@ jobs:
         run: sudo chown -R "$(whoami)" ./target
   build:
     runs-on: ubuntu-latest
-     if: ${{ github.github.ref == 'master' }}
+    if: contains(github.ref, "master")
     env:
       HEROKU_APP: planetexpres
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
