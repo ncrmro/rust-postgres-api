@@ -22,6 +22,8 @@ jobs:
 #        run: sudo chown -R "$(whoami)" ./target
   build:
     runs-on: ubuntu-latest
+    env:
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -39,13 +41,5 @@ jobs:
       - name: Set up Heroku
         run: sudo apt update && sudo apt install curl -y && sudo curl https://cli-assets.heroku.com/install.sh | sh
       - name: Sign into Heroku
-        run: >
-          cat >~/.netrc <<EOF
-          machine api.heroku.com
-              login ${email}
-              password ${api_key}
-          machine git.heroku.com
-              login ${email}
-              password ${api_key}
-          EOF
+        run: heroku apps
 
