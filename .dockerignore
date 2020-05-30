@@ -9,3 +9,4 @@ Dockerfile
 Procfile
 README.md
 tests
+!target/release/planet-express
