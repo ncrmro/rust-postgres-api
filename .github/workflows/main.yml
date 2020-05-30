@@ -36,6 +36,8 @@ jobs:
         run: heroku container:login
       - name: Docker complains if .env not present
         run: touch .env
+      - name: Pull images
+        run: docker-compose pull db app-migrations
       - name: Bring up the database and run migrations.
         run: docker-compose up -d db && docker-compose up app-migrations
       - name: Compile binary
