@@ -1,29 +1,10 @@
+use anyhow::Result;
 use fancy_regex::Regex;
-use sqlx::{PgConnection, PgPool, Pool};
+use planet_express::settings::Settings;
+use sqlx::{query, Connect, Connection, Executor, PgConnection};
 use std::fs;
 
-async fn migrations(connection: Pool<PgConnection>) {
-    let mut paths: Vec<_> = fs::read_dir("migrations")
-        .unwrap()
-        .map(|r| r.unwrap())
-        .collect();
-
-    paths.sort_by_key(|dir| dir.path());
-    for path in paths {
-        let full_path = format!("{}", path.path().display());
-        let contents = fs::read_to_string(full_path).unwrap();
-
-        sqlx::query(contents.as_ref())
-            .execute(&connection)
-            .await
-            .unwrap();
-    }
-}
-
-pub async fn init(settings: planet_express::settings::Settings) -> Pool<PgConnection> {
-    let db_pool = planet_express::db::init_db(&settings.database)
-        .await
-        .unwrap();
+fn test_db_name(settings: &Settings) -> String {
     let re = Regex::new(r"(?x)((?<=\d\/)\w*)").unwrap();
 
     let result = re.captures(&settings.database.database_url);
@@ -32,29 +13,82 @@ pub async fn init(settings: planet_express::settings::Settings) -> Pool<PgConnec
         .expect("No match found");
 
     let db_name = captures.get(1).expect("No group").as_str();
-
     let test_db_name = format!("{}_test", db_name);
+    test_db_name
+}
 
-    let test_db =
-        sqlx::query(format!("SELECT FROM pg_database WHERE datname = '{}'", test_db_name).as_ref())
-            .execute(&db_pool)
-            .await
-            .unwrap();
-    if test_db == 1 {
-        sqlx::query(format!("DROP DATABASE {}", test_db_name).as_ref())
-            .execute(&db_pool)
+async fn init_testdb(settings: &Settings) -> Result<()> {
+    // Take connection from real database and initialize test database
+    let mut conn = PgConnection::connect(&settings.database.database_url)
+        .await
+        .unwrap();
+    let db_name = test_db_name(&settings);
+    query(format!("DROP DATABASE IF EXISTS {}", db_name).as_ref())
+        .execute(&mut conn)
+        .await
+        .unwrap();
+    let test_db = query(format!("SELECT FROM pg_database WHERE datname = '{}'", db_name).as_ref())
+        .execute(&mut conn)
+        .await
+        .unwrap();
+    if test_db == 0 {
+        query(format!("CREATE DATABASE {}", db_name).as_ref())
+            .execute(&mut conn)
             .await
             .unwrap();
     }
-    sqlx::query(format!("CREATE DATABASE {}", test_db_name).as_ref())
-        .execute(&db_pool)
+    Ok(conn.close().await.unwrap())
+}
+
+async fn migrations(mut conn: &mut PgConnection) {
+    let mut paths: Vec<_> = fs::read_dir("migrations")
+        .unwrap()
+        .map(|r| r.unwrap())
+        .collect();
+
+    query(
+        "
+create table __migrations
+(
+    migration varchar(255)                        not null
+        constraint __migrations_pkey
+            primary key,
+    created   timestamp default CURRENT_TIMESTAMP not null
+);
+        ",
+    )
+    .execute(&mut conn)
+    .await
+    .unwrap();
+    paths.sort_by_key(|dir| dir.path());
+
+    for path in paths {
+        let full_path = format!("{}", path.path().display());
+        let contents = fs::read_to_string(full_path).unwrap();
+
+        sqlx::query(contents.as_ref())
+            .execute(&mut conn)
+            .await
+            .unwrap();
+        sqlx::query(
+            format!(
+                "INSERT INTO __migrations (migration) VALUES ('{}');",
+                path.path().display()
+            )
+            .as_ref(),
+        )
+        .execute(&mut conn)
         .await
         .unwrap();
-    db_pool.close().await;
+    }
+}
 
-    let test_db_url = format!("{}_test", settings.database.database_url);
-    let test_connection = PgPool::new(&test_db_url).await.unwrap();
+pub async fn init(settings: Settings) -> PgConnection {
+    init_testdb(&settings).await;
 
-    migrations(test_connection.clone()).await;
-    test_connection
+    let mut conn = PgConnection::connect(&format!("{}_test", settings.database.database_url))
+        .await
+        .unwrap();
+    migrations(&mut conn).await;
+    conn
 }
