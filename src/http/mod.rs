@@ -42,7 +42,7 @@ pub async fn server(settings: Settings) -> Result<()> {
 
     server = match listenfd.take_tcp_listener(0)? {
         Some(listener) => server.listen(listener)?,
-        None => server.bind(format!("{}:{}", settings.http.host, settings.http.port))?,
+        None => server.bind(format!("{}:{}", "0.0.0.0", settings.http.port))?,
     };
 
     Ok(server.run().await?)
