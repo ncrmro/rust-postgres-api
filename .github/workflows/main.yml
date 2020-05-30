@@ -20,8 +20,8 @@ jobs:
         run:  docker-compose up app-migrations
       - name: Test
         run: docker-compose run app cargo test
-      - name: whoamit
-        run: whoamit
+      - name: whoami
+        run: whoami
       - name: LS LA
         run: ls -la target
       - name: LS LA
