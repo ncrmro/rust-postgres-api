@@ -12,6 +12,8 @@ x-app: &app-template
       - db
     volumes:
       - .:/app/
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/app/target
 
 services:
   app:
@@ -39,3 +41,5 @@ services:
 
 volumes:
   pgdata:
+  cargo-cache:
+  target-cache:
