@@ -1,14 +1,18 @@
 use actix_web::{Error, HttpRequest, HttpResponse, Responder};
 use anyhow::Result;
+use fake::{faker::internet, Dummy, Fake, Faker};
+
 use futures::future::{ready, Ready};
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::postgres::PgRow;
+use sqlx::{PgPool, Row};
 
 use paperclip::actix::Apiv2Schema;
 
 #[derive(Serialize, Deserialize, Apiv2Schema)]
 pub struct UserRequest {
-    pub username: String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Serialize, Deserialize, Apiv2Schema)]
@@ -46,5 +50,39 @@ impl User {
             id: rec.id,
             email: rec.email,
         })
+    }
+    pub async fn create(obj: UserRequest, pool: PgPool) -> Result<User> {
+        let mut tx = pool.begin().await?;
+        let obj = sqlx::query(
+            "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username",
+        )
+        .bind(&obj.email)
+        .bind(&obj.password)
+        .map(|row: PgRow| User {
+            id: row.get(0),
+            email: row.get(1),
+        })
+        .fetch_one(&mut tx)
+        .await?;
+
+        tx.commit().await?;
+        Ok(obj)
+    }
+}
+
+pub struct UserFactory {
+    saved: str,
+}
+
+impl UserFactory {
+    pub fn build() -> UserRequest {
+        UserRequest {
+            email: internet::en::FreeEmail().fake(),
+            password: "testpassword".to_string(),
+        }
+    }
+
+    pub async fn new(pool: PgPool) -> User {
+        User::create(UserFactory::build(), pool).await.unwrap()
     }
 }

@@ -1,4 +1,5 @@
-ARG RUST_IMAGE=rust:1.43
+# nightly rust image
+ARG RUST_IMAGE=rustlang/rust@sha256:722a946b19afc1aa32cda11978b1a07426aed06737bf258bec244c0640d50630
 ARG BUILT_IMAGE=debian:buster-slim
 
 ###

@@ -6,8 +6,8 @@ extern crate serde_derive;
 pub mod db;
 pub mod http;
 pub mod settings;
-mod todo;
-mod user;
+pub mod todo;
+pub mod user;
 
 use anyhow::Result;
 use http::server;

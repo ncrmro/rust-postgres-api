@@ -1,3 +1,4 @@
+extern crate fake;
 extern crate planet_express;
 use anyhow::Result;
 
