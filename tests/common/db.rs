@@ -22,10 +22,6 @@ pub async fn create_testdb(settings: &Settings) -> Result<()> {
     let mut conn = PgConnection::connect(&settings.database.database_url)
         .await
         .unwrap();
-    query(format!("DROP DATABASE IF EXISTS {}", test_db_name(&settings)).as_ref())
-        .execute(&mut conn)
-        .await
-        .unwrap();
     let db_name = test_db_name(&settings);
     let test_db = query(format!("SELECT FROM pg_database WHERE datname = '{}'", db_name).as_ref())
         .execute(&mut conn)
@@ -36,7 +32,12 @@ pub async fn create_testdb(settings: &Settings) -> Result<()> {
             .execute(&mut conn)
             .await
             .unwrap();
+        let test_url = format!("{}_test", settings.database.database_url);
+        // Run migrations on test database
+        conn = PgConnection::connect(&test_url).await.unwrap();
+        migrations(&mut conn).await;
     }
+
     Ok(conn.close().await.unwrap())
 }
 
@@ -93,22 +94,23 @@ async fn create_schema(mut conn: &mut PgConnection, name: String) -> String {
 
 pub async fn init(settings: Settings, test_name: String) -> Pool<PgConnection> {
     create_testdb(&settings).await.unwrap();
+
     let test_url = format!("{}_test", settings.database.database_url);
-    // Run migrations on test database
     let mut conn = PgConnection::connect(&test_url).await.unwrap();
-    migrations(&mut conn).await;
+
     // clone database into schema and return schema connection
     let schema_name = create_schema(&mut conn, test_name).await;
     conn.close();
+
     PgPool::new(format!("{}?schema={}", &test_url, schema_name).as_ref())
         .await
         .unwrap()
 }
 
 pub async fn down(settings: Settings, test_id: String) {
-    let test_url = format!("{}", settings.database.database_url);
+    let test_url = format!("{}_test", settings.database.database_url);
     let mut conn = PgConnection::connect(test_url).await.unwrap();
-    query(format!("DROP SCHEMA test_{}", test_id).as_ref())
+    query(format!("DROP SCHEMA test_{} CASCADE", test_id).as_ref())
         .execute(&mut conn)
         .await
         .unwrap();
