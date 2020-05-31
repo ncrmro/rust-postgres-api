@@ -10,5 +10,5 @@ async fn test_index_get() {
     let req = TestRequest::with_header("content-type", "text/plain").to_request();
     let res = read_response(&mut srv, req).await;
     assert_eq!(res, "Hello World".as_bytes());
-    common::teardown(db_conn, test_name);
+    common::teardown(db_conn, test_name).await;
 }
