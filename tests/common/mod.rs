@@ -4,20 +4,41 @@ use actix_web::dev::ServiceResponse;
 use actix_web::{test, App, Error};
 
 use paperclip::actix::OpenApiExt;
-
 pub mod db;
-pub mod runner;
 
-pub async fn server() -> impl Service<Request = Request, Response = ServiceResponse, Error = Error>
-{
-    let settings = planet_express::settings::Settings::new().unwrap();
-    let connection = db::init(settings).await;
+use planet_express::settings::Settings;
+use std::iter;
+use std::panic;
+
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
+use sqlx::{PgConnection, Pool};
+use std::borrow::Borrow;
+
+pub async fn setup() -> (
+    impl Service<Request = Request, Response = ServiceResponse, Error = Error>,
+    Pool<PgConnection>,
+    String,
+) {
+    let settings = Settings::new().unwrap();
+    let mut rng = thread_rng();
+    let test_name: String = iter::repeat(())
+        .map(|()| rng.sample(Alphanumeric))
+        .take(7)
+        .collect();
+    let db_conn = db::init(settings, test_name.clone()).await;
 
     let app = App::new()
-        .data(connection) // pass database pool to application so we can access it inside handlers
+        .data(db_conn.clone()) // pass database pool to application so we can access it inside handlers
         .wrap_api()
         .configure(planet_express::http::routes)
         .build();
 
-    test::init_service(app).await
+    (test::init_service(app).await, db_conn, test_name)
+}
+
+pub async fn teardown(db_conn: Pool<PgConnection>, test_id: String) {
+    let settings = Settings::new().unwrap();
+    db_conn.close().await;
+    db::down(settings, test_id).await;
 }

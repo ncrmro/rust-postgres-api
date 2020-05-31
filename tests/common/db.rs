@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fancy_regex::Regex;
 use planet_express::settings::Settings;
-use sqlx::{query, Connect, Connection, PgConnection};
+use sqlx::{error, query, Connect, Connection, PgConnection, PgPool, Pool};
 use std::fs;
 
 fn test_db_name(settings: &Settings) -> String {
@@ -17,7 +17,7 @@ fn test_db_name(settings: &Settings) -> String {
     test_db_name
 }
 
-pub async fn init_testdb(settings: &Settings) -> Result<()> {
+pub async fn create_testdb(settings: &Settings) -> Result<()> {
     // Take connection from real database and initialize test database
     let mut conn = PgConnection::connect(&settings.database.database_url)
         .await
@@ -83,22 +83,34 @@ create table __migrations
     }
 }
 
-pub async fn init(settings: Settings) -> PgConnection {
-    init_testdb(&settings).await.unwrap();
-
-    let mut conn = PgConnection::connect(&format!("{}_test", settings.database.database_url))
-        .await
-        .unwrap();
-    migrations(&mut conn).await;
-    conn
-}
-
-pub async fn down(settings: Settings) {
-    let mut conn = PgConnection::connect(&settings.database.database_url)
-        .await
-        .unwrap();
-    query(format!("DROP DATABASE IF EXISTS {}", test_db_name(&settings)).as_ref())
+async fn create_schema(mut conn: &mut PgConnection, name: String) -> String {
+    sqlx::query(format!("SELECT clone_schema('public','test_{}');", name).as_ref())
         .execute(&mut conn)
         .await
         .unwrap();
+    format!("test_{}", name)
+}
+
+pub async fn init(settings: Settings, test_name: String) -> Pool<PgConnection> {
+    create_testdb(&settings).await.unwrap();
+    let test_url = format!("{}_test", settings.database.database_url);
+    // Run migrations on test database
+    let mut conn = PgConnection::connect(&test_url).await.unwrap();
+    migrations(&mut conn).await;
+    // clone database into schema and return schema connection
+    let schema_name = create_schema(&mut conn, test_name).await;
+    conn.close();
+    PgPool::new(format!("{}?schema={}", &test_url, schema_name).as_ref())
+        .await
+        .unwrap()
+}
+
+pub async fn down(settings: Settings, test_id: String) {
+    let test_url = format!("{}", settings.database.database_url);
+    let mut conn = PgConnection::connect(test_url).await.unwrap();
+    query(format!("DROP SCHEMA test_{}", test_id).as_ref())
+        .execute(&mut conn)
+        .await
+        .unwrap();
+    conn.close();
 }
