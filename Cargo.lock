@@ -1616,7 +1616,7 @@ dependencies = [
 [[package]]
 name = "paperclip"
 version = "0.3.0"
-source = "git+https://github.com/wafflespeanut/paperclip#fca5a64a862ca47aaf466e19ff6e6cde62c9e43f"
+source = "git+https://github.com/wafflespeanut/paperclip?rev=d3f2a950efa35b2496ce68d85a319ae01cecb40f#d3f2a950efa35b2496ce68d85a319ae01cecb40f"
 dependencies = [
  "failure",
  "failure_derive",
@@ -1636,7 +1636,7 @@ dependencies = [
 [[package]]
 name = "paperclip-actix"
 version = "0.1.0"
-source = "git+https://github.com/wafflespeanut/paperclip#fca5a64a862ca47aaf466e19ff6e6cde62c9e43f"
+source = "git+https://github.com/wafflespeanut/paperclip?rev=d3f2a950efa35b2496ce68d85a319ae01cecb40f#d3f2a950efa35b2496ce68d85a319ae01cecb40f"
 dependencies = [
  "actix-service",
  "actix-web",
@@ -1651,14 +1651,12 @@ dependencies = [
 [[package]]
 name = "paperclip-core"
 version = "0.1.0"
-source = "git+https://github.com/wafflespeanut/paperclip#fca5a64a862ca47aaf466e19ff6e6cde62c9e43f"
+source = "git+https://github.com/wafflespeanut/paperclip?rev=d3f2a950efa35b2496ce68d85a319ae01cecb40f#d3f2a950efa35b2496ce68d85a319ae01cecb40f"
 dependencies = [
  "actix-http",
  "actix-web",
  "failure",
- "heck",
  "lazy_static",
- "log",
  "mime 0.4.0-a.0",
  "paperclip-macros",
  "parking_lot",
@@ -1671,7 +1669,7 @@ dependencies = [
 [[package]]
 name = "paperclip-macros"
 version = "0.2.0"
-source = "git+https://github.com/wafflespeanut/paperclip#fca5a64a862ca47aaf466e19ff6e6cde62c9e43f"
+source = "git+https://github.com/wafflespeanut/paperclip?rev=d3f2a950efa35b2496ce68d85a319ae01cecb40f#d3f2a950efa35b2496ce68d85a319ae01cecb40f"
 dependencies = [
  "heck",
  "http",
