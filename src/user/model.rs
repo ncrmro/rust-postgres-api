@@ -1,6 +1,6 @@
 use actix_web::{Error, HttpRequest, HttpResponse, Responder};
 use anyhow::Result;
-use fake::{faker::internet, Dummy, Fake, Faker};
+use fake::{faker::internet, Fake};
 
 use futures::future::{ready, Ready};
 use serde::{Deserialize, Serialize};
@@ -8,6 +8,7 @@ use sqlx::postgres::PgRow;
 use sqlx::{PgPool, Row};
 
 use paperclip::actix::Apiv2Schema;
+use std::borrow::Borrow;
 
 #[derive(Serialize, Deserialize, Apiv2Schema)]
 pub struct UserRequest {
@@ -51,7 +52,7 @@ impl User {
             email: rec.email,
         })
     }
-    pub async fn create(obj: UserRequest, pool: PgPool) -> Result<User> {
+    pub async fn create(obj: UserRequest, pool: &PgPool) -> Result<User> {
         let mut tx = pool.begin().await?;
         let obj = sqlx::query(
             "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username",
@@ -83,6 +84,8 @@ impl UserFactory {
     }
 
     pub async fn new(pool: PgPool) -> User {
-        User::create(UserFactory::build(), pool).await.unwrap()
+        User::create(UserFactory::build(), pool.borrow())
+            .await
+            .unwrap()
     }
 }

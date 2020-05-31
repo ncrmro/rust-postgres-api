@@ -2,8 +2,9 @@ extern crate fake;
 extern crate planet_express;
 
 mod common;
+use actix_web::test;
 use actix_web::test::{read_response, TestRequest};
-use std::borrow::Borrow;
+use planet_express::user::User;
 
 #[actix_rt::test]
 async fn test_index_get() {
@@ -14,11 +15,17 @@ async fn test_index_get() {
     common::teardown(db_conn, test_name).await;
 }
 
-use std::{thread, time};
-
 #[actix_rt::test]
 async fn test_user_get() {
     let (mut srv, db_conn, test_name) = common::setup().await;
-    let obj = planet_express::user::UserFactory::new(db_conn.clone()).await;
+    let obj = planet_express::user::UserFactory::build();
+    let req = TestRequest::post()
+        .uri("/v1/viewer/create")
+        .set_json(&obj)
+        .to_request();
+    let res: User = test::read_response_json(&mut srv, req).await;
+
+    assert_eq!(res.email, obj.email);
+
     common::teardown(db_conn, test_name).await;
 }
