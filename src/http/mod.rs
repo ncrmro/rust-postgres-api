@@ -35,7 +35,7 @@ pub async fn server(settings: Settings) -> Result<()> {
             // Record services and routes from this line.
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
             .wrap_api()
-            .with_json_spec_at("/api/spec")
+            .with_json_spec_at("/api/spec.json")
             .configure(routes)
             .build()
     });
