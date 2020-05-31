@@ -5,7 +5,8 @@ use actix_web::{test, App, Error};
 
 use paperclip::actix::OpenApiExt;
 
-mod db;
+pub mod db;
+pub mod runner;
 
 pub async fn server() -> impl Service<Request = Request, Response = ServiceResponse, Error = Error>
 {

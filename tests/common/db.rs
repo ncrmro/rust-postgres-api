@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fancy_regex::Regex;
 use planet_express::settings::Settings;
-use sqlx::{query, Connect, Connection, Executor, PgConnection};
+use sqlx::{query, Connect, Connection, PgConnection};
 use std::fs;
 
 fn test_db_name(settings: &Settings) -> String {
@@ -17,16 +17,16 @@ fn test_db_name(settings: &Settings) -> String {
     test_db_name
 }
 
-async fn init_testdb(settings: &Settings) -> Result<()> {
+pub async fn init_testdb(settings: &Settings) -> Result<()> {
     // Take connection from real database and initialize test database
     let mut conn = PgConnection::connect(&settings.database.database_url)
         .await
         .unwrap();
-    let db_name = test_db_name(&settings);
-    query(format!("DROP DATABASE IF EXISTS {}", db_name).as_ref())
+    query(format!("DROP DATABASE IF EXISTS {}", test_db_name(&settings)).as_ref())
         .execute(&mut conn)
         .await
         .unwrap();
+    let db_name = test_db_name(&settings);
     let test_db = query(format!("SELECT FROM pg_database WHERE datname = '{}'", db_name).as_ref())
         .execute(&mut conn)
         .await
@@ -84,11 +84,21 @@ create table __migrations
 }
 
 pub async fn init(settings: Settings) -> PgConnection {
-    init_testdb(&settings).await;
+    init_testdb(&settings).await.unwrap();
 
     let mut conn = PgConnection::connect(&format!("{}_test", settings.database.database_url))
         .await
         .unwrap();
     migrations(&mut conn).await;
     conn
+}
+
+pub async fn down(settings: Settings) {
+    let mut conn = PgConnection::connect(&settings.database.database_url)
+        .await
+        .unwrap();
+    query(format!("DROP DATABASE IF EXISTS {}", test_db_name(&settings)).as_ref())
+        .execute(&mut conn)
+        .await
+        .unwrap();
 }
