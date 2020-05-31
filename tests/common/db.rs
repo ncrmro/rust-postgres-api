@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fancy_regex::Regex;
 use planet_express::settings::Settings;
-use sqlx::{error, query, Connect, Connection, PgConnection, PgPool, Pool};
+use sqlx::{query, Connect, Connection, PgConnection, PgPool, Pool};
 use std::fs;
 
 fn test_db_name(settings: &Settings) -> String {

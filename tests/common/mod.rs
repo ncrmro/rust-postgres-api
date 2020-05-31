@@ -8,12 +8,10 @@ pub mod db;
 
 use planet_express::settings::Settings;
 use std::iter;
-use std::panic;
 
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sqlx::{PgConnection, Pool};
-use std::borrow::Borrow;
 
 pub async fn setup() -> (
     impl Service<Request = Request, Response = ServiceResponse, Error = Error>,
