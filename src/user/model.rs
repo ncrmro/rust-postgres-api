@@ -37,14 +37,14 @@ impl Responder for User {
 
 // Implementation for User struct, functions for read/write/update and delete User from database
 impl User {
-    pub async fn find_by_username(username: String, pool: &PgPool) -> Result<User> {
+    pub async fn find_by_username(username: String, conn: &PgPool) -> Result<User> {
         let rec = sqlx::query!(
             r#"
                     SELECT * FROM Users WHERE username = $1
                 "#,
             username
         )
-        .fetch_one(&*pool)
+        .fetch_one(conn)
         .await?;
 
         Ok(User {
@@ -52,8 +52,8 @@ impl User {
             email: rec.email,
         })
     }
-    pub async fn create(obj: UserRequest, pool: &PgPool) -> Result<User> {
-        let mut tx = pool.begin().await?;
+    pub async fn create(obj: UserRequest, conn: &PgPool) -> Result<User> {
+        let mut tx = conn.begin().await?;
         let obj = sqlx::query(
             "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username",
         )
