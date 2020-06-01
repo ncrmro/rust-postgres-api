@@ -7,11 +7,13 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{PgPool, Row};
 
+use argon2::{self, Config};
 use paperclip::actix::Apiv2Schema;
 use std::borrow::Borrow;
 
 #[derive(Serialize, Deserialize, Apiv2Schema)]
-pub struct UserRequest {
+pub struct UserAuth {
+    pub id: Option<i32>,
     pub email: String,
     pub password: String,
 }
@@ -20,6 +22,12 @@ pub struct UserRequest {
 pub struct User {
     pub id: i32,
     pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Apiv2Schema)]
+pub struct AuthResponse {
+    pub token: String,
+    pub user: User,
 }
 
 impl Responder for User {
@@ -37,55 +45,71 @@ impl Responder for User {
 
 // Implementation for User struct, functions for read/write/update and delete User from database
 impl User {
-    pub async fn find_by_username(username: String, conn: &PgPool) -> Result<User> {
+    pub async fn authenticate(obj: UserAuth, conn: &PgPool) -> Result<AuthResponse> {
+        let email = obj.email;
         let rec = sqlx::query!(
-            r#"
-                    SELECT * FROM Users WHERE username = $1
-                "#,
-            username
+            "SELECT id, email, password FROM users WHERE email = $1",
+            email
         )
         .fetch_one(conn)
         .await?;
 
-        Ok(User {
+        let matches = argon2::verify_encoded(&obj.password, rec.password.as_ref()).unwrap();
+        assert!(matches);
+        let user = User {
             id: rec.id,
             email: rec.email,
+        };
+        Ok(AuthResponse {
+            token: super::auth::jwt_get(user.id),
+            user,
         })
     }
-    pub async fn create(obj: UserRequest, conn: &PgPool) -> Result<User> {
+    pub async fn create(obj: UserAuth, conn: &PgPool) -> Result<AuthResponse> {
         let mut tx = conn.begin().await?;
-        let obj = sqlx::query(
-            "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username",
-        )
-        .bind(&obj.email)
-        .bind(&obj.password)
-        .map(|row: PgRow| User {
-            id: row.get(0),
-            email: row.get(1),
-        })
-        .fetch_one(&mut tx)
-        .await?;
+        let salt = b"randomsalt";
+        let hash = argon2::hash_encoded(obj.password.as_ref(), salt, &Config::default()).unwrap();
+        let rec =
+            sqlx::query("INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email")
+                .bind(&obj.email)
+                .bind(hash)
+                .map(|row: PgRow| User {
+                    id: row.get(0),
+                    email: row.get(1),
+                })
+                .fetch_one(&mut tx)
+                .await?;
 
         tx.commit().await?;
-        Ok(obj)
+        let user = User {
+            id: rec.id,
+            email: rec.email,
+        };
+        Ok(AuthResponse {
+            token: super::auth::jwt_get(user.id),
+            user,
+        })
     }
 }
 
-pub struct UserFactory {
-    saved: str,
-}
+pub struct UserFactory {}
 
 impl UserFactory {
-    pub fn build() -> UserRequest {
-        UserRequest {
+    pub fn build() -> UserAuth {
+        UserAuth {
+            id: None,
             email: internet::en::FreeEmail().fake(),
             password: "testpassword".to_string(),
         }
     }
 
     pub async fn new(pool: PgPool) -> User {
-        User::create(UserFactory::build(), pool.borrow())
+        let obj = User::create(UserFactory::build(), pool.borrow())
             .await
-            .unwrap()
+            .unwrap();
+        User {
+            id: obj.user.id,
+            email: obj.user.email,
+        }
     }
 }

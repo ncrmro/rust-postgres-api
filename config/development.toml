@@ -1,2 +1,3 @@
-
-
+[auth]
+jwt_secret= "secret!"
+password_salt= "salt!"

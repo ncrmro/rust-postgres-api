@@ -20,9 +20,16 @@ pub struct HTTP {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct AUTH {
+    pub jwt_secret: String,
+    pub password_salt: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
     pub database: Database,
     pub http: HTTP,
+    pub auth: AUTH,
 }
 
 impl Settings {

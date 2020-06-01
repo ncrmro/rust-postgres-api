@@ -27,4 +27,6 @@ paperclip = { git = "https://github.com/wafflespeanut/paperclip", rev = "d3f2a95
 fancy-regex = "0.3.5"
 rand = "0.7.3"
 fake = { version = "2.2", features=['derive', 'chrono']}
-
+rust-argon2 = "0.8"
+jsonwebtoken = "7"
+chrono = "0.4.11"

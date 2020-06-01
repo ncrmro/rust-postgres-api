@@ -1,3 +1,4 @@
+mod auth;
 mod model;
 mod routes;
 
