@@ -20,6 +20,7 @@ serde_derive = "1.0.110"
 serde_json = "1.0.51"
 sqlx = { version = "0.3.5", features = [ "postgres", "uuid", "chrono" ] }
 futures = "0.3.4"
+futures-util = "0.3.5"
 env_logger = "0.7.1"
 log = "0.4.8"
 anyhow = "1.0.28"
@@ -30,3 +31,4 @@ fake = { version = "2.2", features=['derive', 'chrono']}
 rust-argon2 = "0.8"
 jsonwebtoken = "7"
 chrono = "0.4.11"
+
