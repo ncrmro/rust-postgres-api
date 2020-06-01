@@ -1,9 +1,13 @@
+// mod middlewares;
+
 use crate::db::init_db;
 use crate::settings::Settings;
 use crate::todo;
 use crate::user;
+use actix_web::middleware::Logger;
 use actix_web::{guard, App, HttpServer};
 use anyhow::Result;
+use env_logger::Env;
 use listenfd::ListenFd;
 use paperclip::actix::{
     api_v2_operation,
@@ -35,10 +39,13 @@ pub async fn server(settings: Settings) -> Result<()> {
 
     let db_pool = init_db(&settings.database).await?;
 
+    env_logger::from_env(Env::default().default_filter_or("info")).init();
+
     let mut server = HttpServer::new(move || {
         App::new()
             // Record services and routes from this line.
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
+            .wrap(Logger::default())
             .wrap_api()
             .with_json_spec_at("/api/spec.json")
             .configure(routes)
