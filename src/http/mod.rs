@@ -2,9 +2,11 @@ use crate::db::init_db;
 use crate::settings::Settings;
 use crate::todo;
 use crate::user;
-use actix_web::{App, HttpServer};
+use actix_web::web::route;
+use actix_web::{guard, App, HttpServer};
 use anyhow::Result;
 use listenfd::ListenFd;
+use paperclip::actix::web::HttpResponse;
 use paperclip::actix::{
     api_v2_operation,
     web::{self},
@@ -14,6 +16,11 @@ use paperclip::actix::{
 #[api_v2_operation]
 async fn index() -> Result<String, ()> {
     Ok("Hello World".to_string())
+}
+
+#[api_v2_operation]
+async fn p404() -> Result<String, ()> {
+    Ok("404".to_string())
 }
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
@@ -38,6 +45,13 @@ pub async fn server(settings: Settings) -> Result<()> {
             .with_json_spec_at("/api/spec.json")
             .configure(routes)
             .build()
+            .default_service(
+                // 404 for GET request
+                web::resource("")
+                    .route(web::get().to(p404))
+                    // all requests that are not `GET`
+                    .route(web::Route::new().guard(guard::Not(guard::Get()))),
+            )
     });
 
     server = match listenfd.take_tcp_listener(0)? {
