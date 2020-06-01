@@ -1,8 +1,8 @@
 use crate::todo::Todo;
-use paperclip::actix::web::{self, get, Json};
+use paperclip::actix::web::{self, get, Data, Json};
 use sqlx::PgPool;
 
-async fn find(id: web::Path<i32>, db_pool: web::Data<PgPool>) -> Result<Json<Todo>, ()> {
+async fn find(id: web::Path<i32>, db_pool: Data<PgPool>) -> Result<Json<Todo>, ()> {
     let result = Todo::find_by_id(id.into_inner(), db_pool.get_ref()).await;
     match result {
         Ok(todo) => Ok(Json(todo)),

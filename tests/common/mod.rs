@@ -9,10 +9,18 @@ pub mod db;
 use planet_express::settings::Settings;
 use std::iter;
 
+use planet_express::user::User;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sqlx::{PgConnection, Pool};
+use std::sync::Arc;
 
+async fn user() -> Result<User, ()> {
+    Ok(User {
+        id: 666,
+        email: "".to_string(),
+    })
+}
 pub async fn setup() -> (
     impl Service<Request = Request, Response = ServiceResponse, Error = Error>,
     Pool<PgConnection>,
@@ -28,8 +36,9 @@ pub async fn setup() -> (
 
     let app = App::new()
         .data(db_conn.clone()) // pass database pool to application so we can access it inside handlers
-        .wrap_api()
+        .data_factory(user)
         .wrap(planet_express::http::middlewares::Viewer)
+        .wrap_api()
         .configure(planet_express::http::routes)
         .build();
 

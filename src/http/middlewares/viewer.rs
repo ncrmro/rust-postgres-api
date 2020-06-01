@@ -3,7 +3,8 @@ use std::task::{Context, Poll};
 use crate::user::User;
 use actix_http::Extensions;
 use actix_service::{Service, Transform};
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
+
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, web::Data, Error, HttpMessage};
 use futures::future::{ok, LocalBoxFuture, Ready};
 use futures::FutureExt;
 use futures_util::lock::Mutex;
@@ -73,9 +74,12 @@ where
             let token = auth.unwrap().to_str().unwrap().replace("Bearer ", "");
             match User::verify_token(token, &conn).await {
                 Ok(user) => {
-                    let mut container = Extensions::new();
-                    container.insert(user);
-                    req.set_data_container(Rc::new(container))
+                    println!("FOUNDER A USER {}", user.email.as_str());
+                    let mut extenions = req.extensions_mut();
+                    extenions.insert(Data::new(User {
+                        id: 100,
+                        email: "email_set_in_middleware".parse().unwrap(),
+                    }));
                 }
                 _ => {}
             };

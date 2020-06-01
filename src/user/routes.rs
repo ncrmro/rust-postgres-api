@@ -1,14 +1,18 @@
 use crate::user::{AuthResponse, User, UserAuth};
+use actix_web::web::Data;
 use paperclip::actix::web::HttpRequest;
 use paperclip::actix::{api_v2_operation, web};
 use sqlx::PgPool;
 
 #[api_v2_operation]
-async fn viewer(_req: HttpRequest, _db_pool: web::Data<PgPool>) -> Result<web::Json<User>, ()> {
-    println!("VIEWER!!!");
+async fn viewer(
+    _req: HttpRequest,
+    viewer: Data<User>,
+    _db_pool: web::Data<PgPool>,
+) -> Result<web::Json<User>, ()> {
     let user = User {
-        id: 1,
-        email: "".to_string(),
+        id: viewer.id,
+        email: viewer.email.to_string(),
     };
     Ok(web::Json(user))
 }
@@ -16,7 +20,7 @@ async fn viewer(_req: HttpRequest, _db_pool: web::Data<PgPool>) -> Result<web::J
 #[api_v2_operation]
 async fn create(
     user: web::Json<UserAuth>,
-    db_pool: web::Data<PgPool>,
+    db_pool: Data<PgPool>,
 ) -> Result<web::Json<AuthResponse>, ()> {
     let res = User::create(&user.into_inner(), db_pool.get_ref())
         .await
@@ -28,7 +32,7 @@ async fn create(
 #[api_v2_operation]
 async fn authenticate(
     user: web::Json<UserAuth>,
-    db_pool: web::Data<PgPool>,
+    db_pool: Data<PgPool>,
 ) -> Result<web::Json<AuthResponse>, ()> {
     let res = User::authenticate(user.into_inner(), db_pool.get_ref())
         .await
