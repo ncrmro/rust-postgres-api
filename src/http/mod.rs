@@ -4,6 +4,7 @@ use crate::db::init_db;
 use crate::settings::Settings;
 use crate::todo;
 use crate::user;
+use crate::user::User;
 use actix_web::middleware::Logger;
 use actix_web::{guard, App, HttpServer};
 use anyhow::Result;
@@ -45,6 +46,10 @@ pub async fn server(settings: Settings) -> Result<()> {
         App::new()
             // Record services and routes from this line.
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
+            .data(User {
+                id: 0,
+                email: "".to_string(),
+            })
             .wrap(Logger::default())
             .wrap(middlewares::Viewer)
             .wrap_api()

@@ -29,6 +29,7 @@ pub async fn setup() -> (
     let app = App::new()
         .data(db_conn.clone()) // pass database pool to application so we can access it inside handlers
         .wrap_api()
+        .wrap(planet_express::http::middlewares::Viewer)
         .configure(planet_express::http::routes)
         .build();
 

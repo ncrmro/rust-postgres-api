@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{PgPool, Row};
 
+use crate::user::auth::jwt_verify;
 use argon2::{self, Config};
 use paperclip::actix::Apiv2Schema;
 use std::borrow::Borrow;
@@ -45,6 +46,27 @@ impl Responder for User {
 
 // Implementation for User struct, functions for read/write/update and delete User from database
 impl User {
+    pub async fn verify_token(token: String, conn: &PgPool) -> Result<User, bool> {
+        let claims = jwt_verify(token.parse().unwrap());
+        if claims.is_err() {
+            return Err(false);
+        }
+        let row = sqlx::query!(
+            "SELECT id, email, password FROM users WHERE id = $1",
+            claims.unwrap().user_id
+        )
+        .fetch_one(conn)
+        .await;
+
+        match row {
+            Ok(user) => Ok(User {
+                id: user.id,
+                email: user.email,
+            }),
+            Err(_err) => Err(false),
+        }
+    }
+
     pub async fn authenticate(obj: UserAuth, conn: &PgPool) -> Result<AuthResponse> {
         let email = obj.email;
         let rec = sqlx::query!(
