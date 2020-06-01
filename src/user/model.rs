@@ -53,8 +53,7 @@ impl User {
         )
         .fetch_one(conn)
         .await?;
-
-        let matches = argon2::verify_encoded(&obj.password, rec.password.as_ref()).unwrap();
+        let matches = argon2::verify_encoded(&rec.password, obj.password.as_ref()).unwrap();
         assert!(matches);
         let user = User {
             id: rec.id,
@@ -65,7 +64,7 @@ impl User {
             user,
         })
     }
-    pub async fn create(obj: UserAuth, conn: &PgPool) -> Result<AuthResponse> {
+    pub async fn create(obj: &UserAuth, conn: &PgPool) -> Result<AuthResponse> {
         let mut tx = conn.begin().await?;
         let salt = b"randomsalt";
         let hash = argon2::hash_encoded(obj.password.as_ref(), salt, &Config::default()).unwrap();
@@ -103,13 +102,13 @@ impl UserFactory {
         }
     }
 
-    pub async fn new(pool: PgPool) -> User {
-        let obj = User::create(UserFactory::build(), pool.borrow())
-            .await
-            .unwrap();
-        User {
-            id: obj.user.id,
+    pub async fn new(pool: PgPool) -> UserAuth {
+        let obj_build = UserFactory::build();
+        let obj = User::create(&obj_build, pool.borrow()).await.unwrap();
+        UserAuth {
+            id: None,
             email: obj.user.email,
+            password: obj_build.password,
         }
     }
 }

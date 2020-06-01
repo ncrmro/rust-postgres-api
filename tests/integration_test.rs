@@ -2,9 +2,10 @@ extern crate fake;
 extern crate planet_express;
 
 mod common;
+// use actix_web::http::StatusCode;
 use actix_web::test;
 use actix_web::test::{read_response, TestRequest};
-use planet_express::user::{AuthResponse, User};
+use planet_express::user::{AuthResponse, UserAuth};
 
 #[actix_rt::test]
 async fn test_index_get() {
@@ -30,17 +31,20 @@ async fn test_auth_viewer_create() {
     common::teardown(db_conn, test_name).await;
 }
 
-// #[actix_rt::test]
-// async fn test_auth_viewer_authenticate() {
-//     let (mut srv, db_conn, test_name) = common::setup().await;
-//     let obj = planet_express::user::UserFactory::build();
-//     let req = TestRequest::get()
-//         .uri("/v1/viewer/authenticate")
-//         // .header("authorization", obj.email.as_str())
-//         .to_request();
-//     let res: User = test::read_response_json(&mut srv, req).await;
-//
-//     assert_eq!(res.email, obj.email);
-//
-//     common::teardown(db_conn, test_name).await;
-// }
+#[actix_rt::test]
+async fn test_auth_viewer_authenticate() {
+    let (mut srv, db_conn, test_name) = common::setup().await;
+    let obj = planet_express::user::UserFactory::new(db_conn.clone()).await;
+    let req = TestRequest::post()
+        .uri("/v1/viewer/authenticate")
+        .set_json(&UserAuth {
+            id: None,
+            email: obj.email.clone(),
+            password: obj.password,
+        })
+        .to_request();
+
+    let res: AuthResponse = test::read_response_json(&mut srv, req).await;
+    assert_eq!(res.user.email, obj.email.clone());
+    common::teardown(db_conn, test_name).await;
+}
