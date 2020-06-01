@@ -74,12 +74,7 @@ where
             let token = auth.unwrap().to_str().unwrap().replace("Bearer ", "");
             match User::verify_token(token, &conn).await {
                 Ok(user) => {
-                    println!("FOUNDER A USER {}", user.email.as_str());
-                    let mut extenions = req.extensions_mut();
-                    extenions.insert(Data::new(User {
-                        id: 100,
-                        email: "email_set_in_middleware".parse().unwrap(),
-                    }));
+                    req.extensions_mut().insert(user);
                 }
                 _ => {}
             };
