@@ -69,8 +69,9 @@ where
             if auth.is_none() {
                 return service.call(req).await;
             }
-            match User::verify_token(auth.unwrap().to_str().unwrap().parse().unwrap(), &conn).await
-            {
+
+            let token = auth.unwrap().to_str().unwrap().replace("Bearer ", "");
+            match User::verify_token(token, &conn).await {
                 Ok(user) => {
                     let mut container = Extensions::new();
                     container.insert(user);
