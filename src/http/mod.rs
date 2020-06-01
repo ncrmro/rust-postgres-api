@@ -2,11 +2,9 @@ use crate::db::init_db;
 use crate::settings::Settings;
 use crate::todo;
 use crate::user;
-use actix_web::web::route;
 use actix_web::{guard, App, HttpServer};
 use anyhow::Result;
 use listenfd::ListenFd;
-use paperclip::actix::web::HttpResponse;
 use paperclip::actix::{
     api_v2_operation,
     web::{self},
