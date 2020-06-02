@@ -7,12 +7,6 @@ use planet_express::user::{User, UserAuth};
 #[derive(Clap)]
 #[clap(version = "1.0", author = "Nicholas R. <ncrmro@gmail.com>")]
 struct Opts {
-    /// Sets a custom config file. Could have been an Option<T> with no default too
-    #[clap(short, long, default_value = "default.conf")]
-    config: String,
-    /// A level of verbosity, and can be used multiple times
-    #[clap(short, long, parse(from_occurrences))]
-    verbose: i32,
     #[clap(subcommand)]
     subcmd: SubCommand,
 }
@@ -31,7 +25,7 @@ struct Createuser {
     #[clap(short, long)]
     password: String,
     #[clap(short)]
-    superuser: Option<bool>,
+    // superuser: Option<bool>,
 }
 
 async fn create_user(args: Createuser, settings: Settings) {
