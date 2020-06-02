@@ -16,7 +16,7 @@ jobs:
         run: docker-compose pull
       - name: Bring up the database
         run: docker-compose up -d db
-      - name: && Migrate database
+      - name: Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
       - name: Lint
         run: docker-compose run app cargo clippy
