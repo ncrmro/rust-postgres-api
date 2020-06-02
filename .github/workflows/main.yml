@@ -50,6 +50,8 @@ jobs:
         run: docker-compose up -d db
       - name: SLEEP!
         run: sleep 15
+      - name: CONTAINER
+        run: docker ps
       - name: PING
         run: docker-compose run app ping -c 3 db
       - name: Migrate database
