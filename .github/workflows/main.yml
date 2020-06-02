@@ -23,6 +23,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    needs: test
     env:
       HEROKU_APP: planetexpres
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
