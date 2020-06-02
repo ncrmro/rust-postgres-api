@@ -18,6 +18,8 @@ jobs:
         run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
+      - name: Clone test DB to avoid panics from each test trying to create database
+        run: docker-compose run db psql -c "CREATE DATABASE pexp_test FROM pexp OWNER pexp"
       - name: Lint
         run: docker-compose run app cargo clippy
       - name: Test
