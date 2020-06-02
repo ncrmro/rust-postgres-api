@@ -28,7 +28,7 @@ jobs:
       - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
         run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
-        run: docker-compose run app cargo clippy
+        run: docker-compose run app cargo clippy -- -D warnings
       - name: Test
         run: docker-compose run app cargo test
       - name: Chown cache files
