@@ -28,7 +28,7 @@ jobs:
 #        run: sudo chown -R "$(whoami)" ./target
   build:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+#    if: github.ref == 'refs/heads/master'
 #    needs: test
     env:
       HEROKU_APP: planetexpres
@@ -47,7 +47,7 @@ jobs:
       - name: Pull images
         run: docker-compose pull
       - name: Bring up the database
-        run: docker-compose up -d db && dc down docker-compose up -d db
+        run: docker-compose up -d db && docker-compose down && docker-compose up -d db
       - name: Migrate database
         run: docker-compose run app-migrations
       - name: Compile binary
