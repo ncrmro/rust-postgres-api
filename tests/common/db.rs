@@ -4,7 +4,7 @@ use planet_express::settings::Settings;
 use sqlx::{query, Connect, Connection, PgConnection, PgPool, Pool};
 use std::fs;
 
-fn test_db_name(settings: &Settings) -> String {
+fn db_name(settings: &Settings) -> String {
     let re = Regex::new(r"(?x)((?<=\d\/)\w*)").unwrap();
 
     let result = re.captures(&settings.database.database_url);
@@ -13,8 +13,12 @@ fn test_db_name(settings: &Settings) -> String {
         .expect("No match found");
 
     let db_name = captures.get(1).expect("No group").as_str();
-    let test_db_name = format!("{}_test", db_name);
-    test_db_name
+    // let test_db_name = format!("{}_test", db_name);
+    String::from(db_name)
+}
+
+fn get_test_db_name(settings: &Settings) -> String {
+    format!("{}_test", db_name(settings))
 }
 
 pub async fn create_testdb(settings: &Settings) -> Result<()> {
@@ -22,13 +26,14 @@ pub async fn create_testdb(settings: &Settings) -> Result<()> {
     let mut conn = PgConnection::connect(&settings.database.database_url)
         .await
         .unwrap();
-    let db_name = test_db_name(&settings);
-    let test_db = query(format!("SELECT FROM pg_database WHERE datname = '{}'", db_name).as_ref())
-        .execute(&mut conn)
-        .await
-        .unwrap();
+    let test_db_name = get_test_db_name(&settings);
+    let test_db =
+        query(format!("SELECT FROM pg_database WHERE datname = '{}'", test_db_name).as_ref())
+            .execute(&mut conn)
+            .await
+            .unwrap();
     if test_db == 0 {
-        query(format!("CREATE DATABASE {}", db_name).as_ref())
+        query(format!("CREATE DATABASE {}", test_db_name).as_ref())
             .execute(&mut conn)
             .await
             .unwrap();
