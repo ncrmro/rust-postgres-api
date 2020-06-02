@@ -48,6 +48,8 @@ jobs:
         run: docker-compose pull
       - name: Bring up the database
         run: docker-compose up -d db
+      - name: SLEEP!
+        run: sleep 5
       - name: PING
         run: docker-compose run app ping -c 3 db
       - name: Migrate database
