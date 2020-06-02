@@ -40,10 +40,8 @@ jobs:
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
-      - name: Set up Heroku
-        run: sudo apt update && sudo apt install curl -y && sudo curl https://cli-assets.heroku.com/install.sh | sh
-      - name: Sign into heroku container registry
-        run: heroku container:login
+      - name: Docker compose version
+        run: docker-compose version
       - name: Docker complains if .env not present
         run: touch .env
       - name: Pull images
@@ -56,6 +54,10 @@ jobs:
         run: docker-compose run app cargo build --release
       - name: Build release image
         run: docker build --tag web . && docker tag web $IMAGE_BASE/web
+      - name: Set up Heroku
+        run: sudo apt update && sudo apt install curl -y && sudo curl https://cli-assets.heroku.com/install.sh | sh
+      - name: Sign into heroku container registry
+        run: heroku container:login
       - name: Push release image
         run: docker push registry.heroku.com/planetexpres/web
       - name: Release new image
