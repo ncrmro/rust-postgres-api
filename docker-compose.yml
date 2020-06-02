@@ -6,7 +6,6 @@ x-app: &app-template
       - .env
     environment:
       TERM: xterm-256color
-      DATABASE_URL: postgres://pexp:pexp@db:5432/pexp
       CARGO_HOME: /app/target/.cache/cargo
     depends_on:
       - db
