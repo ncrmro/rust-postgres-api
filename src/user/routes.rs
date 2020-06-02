@@ -22,10 +22,13 @@ async fn create(
     user: web::Json<UserAuth>,
     db_pool: Data<PgPool>,
 ) -> Result<web::Json<AuthResponse>, ()> {
-    let res = User::create(&user.into_inner(), db_pool.get_ref())
+    let user = User::create(&user.into_inner(), db_pool.get_ref())
         .await
         .unwrap();
-
+    let res = AuthResponse {
+        token: super::auth::jwt_get(user.id),
+        user: user,
+    };
     Ok(web::Json(res))
 }
 
