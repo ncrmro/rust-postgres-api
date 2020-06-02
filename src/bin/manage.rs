@@ -24,7 +24,7 @@ struct Createuser {
     email: String,
     #[clap(short, long)]
     password: String,
-    #[clap(short)]
+    // #[clap(short)]
     // superuser: Option<bool>,
 }
 
