@@ -8,15 +8,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/.cargo
+          path: target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ./target/
-            !./target/.cargo
-          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker complains if .env not present
         run: cp .env.example .env
       - name: Pull images
@@ -35,8 +28,8 @@ jobs:
         run: sudo chown -R "$(whoami)" ./target
   build:
     runs-on: ubuntu-latest
-#    if: github.ref == 'refs/heads/master'
-#    needs: test
+    if: github.ref == 'refs/heads/master'
+    needs: test
     env:
       HEROKU_APP: planetexpres
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
@@ -50,19 +43,11 @@ jobs:
       - name: Docker compose version
         run: docker-compose version
       - name: Docker complains if .env not present
-        run: touch .env
+        run: cp .env.example .env
       - name: Pull images
         run: docker-compose pull
       - name: Bring up the database
         run: docker-compose up -d db
-      - name: SLEEP!
-        run: sleep 15
-      - name: CONTAINER
-        run: docker ps -a
-      - name: CONTAINER
-        run: docker logs planet-express_db_1
-      - name: PING
-        run: docker-compose run app ping -c 3 db
       - name: Migrate database
         run: docker-compose run app-migrations
       - name: Compile binary
