@@ -1,9 +1,8 @@
 use clap::Clap;
 use futures::executor::block_on;
 use planet_express::db::init_db;
-use planet_express::settings;
 use planet_express::settings::Settings;
-use planet_express::user::{AuthResponse, User, UserAuth};
+use planet_express::user::{User, UserAuth};
 
 #[derive(Clap)]
 #[clap(version = "1.0", author = "Nicholas R. <ncrmro@gmail.com>")]
