@@ -8,8 +8,15 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: target
+          path: |
+            ./target/.cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ./target/
+            !./target/.cargo
+          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker complains if .env not present
         run: cp .env.example .env
       - name: Pull images
