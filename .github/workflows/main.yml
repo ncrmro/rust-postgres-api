@@ -52,6 +52,8 @@ jobs:
         run: sleep 15
       - name: CONTAINER
         run: docker ps -a
+      - name: CONTAINER
+        run: docker logs planet-express_db_1
       - name: PING
         run: docker-compose run app ping -c 3 db
       - name: Migrate database
