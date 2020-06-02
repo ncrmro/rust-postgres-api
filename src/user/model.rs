@@ -88,7 +88,7 @@ impl User {
         }
     }
 
-    pub async fn authenticate(obj: UserAuth, conn: &PgPool) -> Result<AuthResponse> {
+    pub async fn authenticate(obj: UserAuth, conn: &PgPool) -> Result<User> {
         let email = obj.email;
         let rec = sqlx::query!(
             "SELECT id, email, password FROM users WHERE email = $1",
@@ -102,10 +102,7 @@ impl User {
             id: rec.id,
             email: rec.email,
         };
-        Ok(AuthResponse {
-            token: super::auth::jwt_get(user.id),
-            user,
-        })
+        Ok(user)
     }
     pub async fn create(obj: &UserAuth, conn: &PgPool) -> Result<User> {
         let mut tx = conn.begin().await?;

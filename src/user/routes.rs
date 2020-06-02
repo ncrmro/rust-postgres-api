@@ -27,7 +27,7 @@ async fn create(
         .unwrap();
     let res = AuthResponse {
         token: super::auth::jwt_get(user.id),
-        user: user,
+        user,
     };
     Ok(web::Json(res))
 }
@@ -37,9 +37,13 @@ async fn authenticate(
     user: web::Json<UserAuth>,
     db_pool: Data<PgPool>,
 ) -> Result<web::Json<AuthResponse>, ()> {
-    let res = User::authenticate(user.into_inner(), db_pool.get_ref())
+    let user = User::authenticate(user.into_inner(), db_pool.get_ref())
         .await
         .unwrap();
+    let res = AuthResponse {
+        token: super::auth::jwt_get(user.id),
+        user,
+    };
     Ok(web::Json(res))
 }
 
