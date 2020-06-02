@@ -1,8 +1,12 @@
 use anyhow::Result;
 use fancy_regex::Regex;
+use futures::executor::block_on;
 use planet_express::settings::Settings;
 use sqlx::{query, Connect, Connection, PgConnection, PgPool, Pool};
 use std::fs;
+use std::sync::Once;
+
+static START: Once = Once::new();
 
 fn db_name(settings: &Settings) -> String {
     let re = Regex::new(r"(?x)((?<=\d\/)\w*)").unwrap();
@@ -21,7 +25,7 @@ fn get_test_db_name(settings: &Settings) -> String {
     format!("{}_test", db_name(settings))
 }
 
-pub async fn create_testdb(settings: &Settings) -> Result<()> {
+pub async fn create_testdb(settings: &Settings) {
     // Take connection from real database and initialize test database
     let mut conn = PgConnection::connect(&settings.database.database_url)
         .await
@@ -43,7 +47,6 @@ pub async fn create_testdb(settings: &Settings) -> Result<()> {
         migrations(&mut conn).await;
     }
     conn.close().await.unwrap();
-    Ok(())
 }
 
 async fn migrations(mut conn: &mut PgConnection) {
@@ -98,7 +101,7 @@ async fn create_schema(mut conn: &mut PgConnection, name: String) -> String {
 }
 
 pub async fn init(settings: Settings, test_name: String) -> Pool<PgConnection> {
-    create_testdb(&settings).await.unwrap();
+    create_testdb(&settings).await;
 
     let test_url = format!("{}_test", settings.database.database_url);
     let mut conn = PgConnection::connect(&test_url).await.unwrap();

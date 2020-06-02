@@ -8,8 +8,16 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: target
+          path: |
+            ./target/.cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ./target/debug
+            ./target/.rustc_info.json
+            !./target/.cargo
+          key: ${{ runner.os }}-target-debug-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker complains if .env not present
         run: cp .env.example .env
       - name: Pull images
@@ -21,7 +29,7 @@ jobs:
       - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
         run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
-        run: docker-compose run app cargo clippy
+        run: docker-compose run app cargo clippy -- -D warnings
       - name: Test
         run: docker-compose run app cargo test
       - name: Chown cache files
@@ -38,8 +46,16 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          path: |
+            ./target/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ./target/release
+            ./target/.rustc_info.json
+            !./target/.cargo
+          key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker compose version
         run: docker-compose version
       - name: Docker complains if .env not present

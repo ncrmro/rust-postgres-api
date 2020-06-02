@@ -88,7 +88,7 @@ impl User {
         }
     }
 
-    pub async fn authenticate(obj: UserAuth, conn: &PgPool) -> Result<AuthResponse> {
+    pub async fn authenticate(obj: UserAuth, conn: &PgPool) -> Result<User> {
         let email = obj.email;
         let rec = sqlx::query!(
             "SELECT id, email, password FROM users WHERE email = $1",
@@ -102,12 +102,9 @@ impl User {
             id: rec.id,
             email: rec.email,
         };
-        Ok(AuthResponse {
-            token: super::auth::jwt_get(user.id),
-            user,
-        })
+        Ok(user)
     }
-    pub async fn create(obj: &UserAuth, conn: &PgPool) -> Result<AuthResponse> {
+    pub async fn create(obj: &UserAuth, conn: &PgPool) -> Result<User> {
         let mut tx = conn.begin().await?;
         let salt = b"randomsalt";
         let hash = argon2::hash_encoded(obj.password.as_ref(), salt, &Config::default()).unwrap();
@@ -127,10 +124,7 @@ impl User {
             id: rec.id,
             email: rec.email,
         };
-        Ok(AuthResponse {
-            token: super::auth::jwt_get(user.id),
-            user,
-        })
+        Ok(user)
     }
 }
 
@@ -150,7 +144,7 @@ impl UserFactory {
         let obj = User::create(&obj_build, pool.borrow()).await.unwrap();
         UserAuth {
             id: None,
-            email: obj.user.email,
+            email: obj.email,
             password: obj_build.password,
         }
     }

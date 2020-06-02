@@ -6,13 +6,13 @@ x-app: &app-template
       - .env
     environment:
       TERM: xterm-256color
-      CARGO_HOME: /app/target/.cache/cargo
+      CARGO_HOME: /app/target/.cargo
     depends_on:
       - db
     volumes:
       - .:/app/
-      - cargo-cache:/usr/local/cargo/registry
-      - target-cache:/app/target
+#      - cargo-cache:/usr/local/cargo/registry
+#      - target-cache:/app/target
 
 services:
   app:
@@ -43,8 +43,8 @@ services:
 
 volumes:
   pgdata:
-  cargo-cache:
-  target-cache:
+#  cargo-cache:
+#  target-cache:
 
 ###
 # docker volume rm planet-express_pgdata
