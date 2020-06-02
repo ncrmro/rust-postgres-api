@@ -6,7 +6,6 @@ x-app: &app-template
       - .env
     environment:
       TERM: xterm-256color
-      DATABASE_URL: postgres://pexp:pexp@db:5432/pexp
       CARGO_HOME: /app/target/.cache/cargo
     depends_on:
       - db
@@ -25,7 +24,7 @@ services:
     command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
   app-migrations:
     <<: *app-template
-    command: ping -c 3 db && bash -c 'while !</dev/tcp/db/5432; do sleep 3; done; sqlx mig run'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 3; done; sqlx mig run'
     volumes:
       - ./migrations/:/app/migrations/:rw
   db:
