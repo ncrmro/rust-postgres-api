@@ -47,7 +47,9 @@ jobs:
       - name: Pull images
         run: docker-compose pull
       - name: Bring up the database
-        run: docker-compose up -d db && docker-compose down && docker-compose up -d db
+        run: docker-compose up -d db
+      - name: PING
+        run: docker-compose run app ping -c 3 db
       - name: Migrate database
         run: docker-compose run app-migrations
       - name: Compile binary

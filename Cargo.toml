@@ -33,4 +33,4 @@ fake = { version = "2.2", features=['derive', 'chrono']}
 rust-argon2 = "0.8"
 jsonwebtoken = "7"
 chrono = "0.4.11"
-
+clap = "3.0.0-beta.1"
