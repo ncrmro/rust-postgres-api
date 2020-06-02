@@ -25,7 +25,7 @@ services:
     command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
   app-migrations:
     <<: *app-template
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 3; done; sqlx mig run'
+    command: ping -c 3 db && bash -c 'while !</dev/tcp/db/5432; do sleep 3; done; sqlx mig run'
     volumes:
       - ./migrations/:/app/migrations/:rw
   db:
@@ -36,11 +36,11 @@ services:
       - pgdata/:/var/lib/postgresql/data
     ports:
       - 5432:5432
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready --username=pexp --dbname=pexp --timeout 30"]
-#      interval: 5s
-#      timeout: 5s
-#      retries: 5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=pexp --dbname=pexp --timeout 30"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
