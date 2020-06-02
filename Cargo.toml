@@ -3,6 +3,8 @@ name = "planet-express"
 version = "0.1.0"
 authors = ["ncrmro <ncrmro@gmail.com>"]
 edition = "2018"
+default-run = "planet-express"
+
 
 [lib]
 doctest = false
