@@ -1,4 +1,5 @@
 use crate::user::{AuthResponse, User, UserAuth};
+use actix_http::error::{Error, ErrorBadRequest};
 use actix_web::web::Data;
 use paperclip::actix::web::HttpRequest;
 use paperclip::actix::{api_v2_operation, web};
@@ -7,14 +8,13 @@ use sqlx::PgPool;
 #[api_v2_operation]
 async fn viewer(
     _req: HttpRequest,
-    viewer: Data<User>,
+    viewer: Option<User>,
     _db_pool: web::Data<PgPool>,
-) -> Result<web::Json<User>, ()> {
-    let user = User {
-        id: viewer.id,
-        email: viewer.email.to_string(),
-    };
-    Ok(web::Json(user))
+) -> Result<web::Json<User>, Error> {
+    match viewer {
+        Some(user) => Ok(web::Json(user)),
+        None => Err(ErrorBadRequest("Not Authenticated")),
+    }
 }
 
 #[api_v2_operation]

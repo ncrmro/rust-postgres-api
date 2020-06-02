@@ -1,8 +1,10 @@
-use actix_web::{Error, HttpRequest, HttpResponse, Responder};
+use actix_web::error::ErrorBadRequest;
+use actix_web::{dev, Error, FromRequest, HttpRequest, HttpResponse, Responder};
+
 use anyhow::Result;
 use fake::{faker::internet, Fake};
 
-use futures::future::{ready, Ready};
+use futures::future::{err, ok, ready, Ready};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{PgPool, Row};
@@ -11,6 +13,7 @@ use crate::user::auth::jwt_verify;
 use argon2::{self, Config};
 use paperclip::actix::Apiv2Schema;
 use std::borrow::Borrow;
+use std::ops::Deref;
 
 #[derive(Serialize, Deserialize, Apiv2Schema)]
 pub struct UserAuth {
@@ -23,6 +26,26 @@ pub struct UserAuth {
 pub struct User {
     pub id: i32,
     pub email: String,
+}
+
+impl FromRequest for User {
+    type Error = Error;
+    type Future = Ready<Result<Self, Self::Error>>;
+    type Config = ();
+
+    fn from_request(req: &HttpRequest, payload: &mut dev::Payload) -> Self::Future {
+        let ext = req.extensions();
+        let user = ext.get::<User>();
+        if user.is_some() {
+            let u = user.unwrap();
+            ok(User {
+                id: u.id,
+                email: u.email.to_string(),
+            })
+        } else {
+            err(ErrorBadRequest("DICKHOLE"))
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Apiv2Schema)]

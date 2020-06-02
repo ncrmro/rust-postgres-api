@@ -47,6 +47,10 @@ pub async fn server(settings: Settings) -> Result<()> {
         App::new()
             // Record services and routes from this line.
             .data(db_pool.clone()) // pass database pool to application so we can access it inside handlers
+            .data(User {
+                id: 0,
+                email: "".to_string(),
+            })
             .wrap(Logger::default())
             .wrap(middlewares::Viewer)
             .wrap_api()
