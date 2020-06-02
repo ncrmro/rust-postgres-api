@@ -1,7 +1,6 @@
 extern crate fake;
 extern crate planet_express;
 use anyhow::Result;
-use std::env;
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
