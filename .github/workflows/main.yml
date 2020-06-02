@@ -11,12 +11,12 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker complains if .env not present
-        run: touch .env
+        run: cp .env.example .env
       - name: Pull images
         run: docker-compose pull
       - name: Bring up the database
         run: docker-compose up -d db
-      - name: sleep 5 && Migrate database
+      - name: && Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
       - name: Lint
         run: docker-compose run app cargo clippy
