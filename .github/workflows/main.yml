@@ -2,34 +2,34 @@ name: Docker Compose Actions Workflow
 on: [push, pull_request]
 
 jobs:
-#  test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: actions/cache@v2
-#        with:
-#          path: target
-#          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-#      - name: Docker complains if .env not present
-#        run: cp .env.example .env
-#      - name: Pull images
-#        run: docker-compose pull
-#      - name: Bring up the database
-#        run: docker-compose up -d db
-#      - name: Migrate database
-#        run: docker-compose up --exit-code-from app-migrations app-migrations
-#      - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
-#        run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
-#      - name: Lint
-#        run: docker-compose run app cargo clippy
-#      - name: Test
-#        run: docker-compose run app cargo test
-#      - name: Chown cache files
-#        run: sudo chown -R "$(whoami)" ./target
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Docker complains if .env not present
+        run: cp .env.example .env
+      - name: Pull images
+        run: docker-compose pull
+      - name: Bring up the database
+        run: docker-compose up -d db
+      - name: Migrate database
+        run: docker-compose up --exit-code-from app-migrations app-migrations
+      - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
+        run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
+      - name: Lint
+        run: docker-compose run app cargo clippy
+      - name: Test
+        run: docker-compose run app cargo test
+      - name: Chown cache files
+        run: sudo chown -R "$(whoami)" ./target
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
-#    needs: test
+    needs: test
     env:
       HEROKU_APP: planetexpres
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
@@ -43,11 +43,11 @@ jobs:
       - name: Docker compose version
         run: docker-compose version
       - name: Docker complains if .env not present
-        run: touch .env
+        run: cp .env.example .env
       - name: Pull images
         run: docker-compose pull
       - name: Bring up the database
-        run: docker-compose up -d db && dc down docker-compose up -d db
+        run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose run app-migrations
       - name: Compile binary
