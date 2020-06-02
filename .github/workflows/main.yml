@@ -15,7 +15,7 @@ jobs:
       - name: Pull images
         run: docker-compose pull
       - name: Bring up the database
-        run: docker-compose up --exit-code-from db -d db
+        run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
       - name: Lint
