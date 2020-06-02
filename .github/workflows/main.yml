@@ -51,7 +51,7 @@ jobs:
       - name: Bring up the database
         run: docker-compose up -d db
       - name: Migrate database
-        run: docker-compose up --exit-code-from app-migrations app-migrations
+        run: docker-compose up run app-migrations
       - name: Compile binary
         run: docker-compose run app cargo build --release
       - name: Build release image
