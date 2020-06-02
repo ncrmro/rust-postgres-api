@@ -19,7 +19,7 @@ jobs:
       - name: Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
       - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
-        run: COMPOSE_INTERACTIVE_NO_CLI=1 docker-compose exec db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
+        run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
         run: docker-compose run app cargo clippy
       - name: Test
