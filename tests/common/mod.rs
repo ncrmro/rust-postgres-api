@@ -13,7 +13,6 @@ use planet_express::user::User;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sqlx::{PgConnection, Pool};
-use std::sync::Arc;
 
 async fn user() -> Result<User, ()> {
     Ok(User {

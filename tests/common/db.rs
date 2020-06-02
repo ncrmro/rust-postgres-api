@@ -37,8 +37,8 @@ pub async fn create_testdb(settings: &Settings) -> Result<()> {
         conn = PgConnection::connect(&test_url).await.unwrap();
         migrations(&mut conn).await;
     }
-
-    Ok(conn.close().await.unwrap())
+    conn.close().await.unwrap();
+    Ok(())
 }
 
 async fn migrations(mut conn: &mut PgConnection) {

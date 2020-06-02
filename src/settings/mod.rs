@@ -57,7 +57,7 @@ impl Settings {
         // Add in the current environment file
         // Default to 'development' env
         // Note that this file is _optional_
-        let env = env::var("APP_ENV").unwrap_or("development".into());
+        let env = env::var("APP_ENV").unwrap_or_else(|_| "development".into());
         settings.merge(File::with_name(&format!("config/{}", env)).required(false))?;
 
         // Add in a local configuration file

@@ -13,7 +13,6 @@ use crate::user::auth::jwt_verify;
 use argon2::{self, Config};
 use paperclip::actix::Apiv2Schema;
 use std::borrow::Borrow;
-use std::ops::Deref;
 
 #[derive(Serialize, Deserialize, Apiv2Schema)]
 pub struct UserAuth {
@@ -33,14 +32,13 @@ impl FromRequest for User {
     type Future = Ready<Result<Self, Self::Error>>;
     type Config = ();
 
-    fn from_request(req: &HttpRequest, payload: &mut dev::Payload) -> Self::Future {
+    fn from_request(req: &HttpRequest, _payload: &mut dev::Payload) -> Self::Future {
         let ext = req.extensions();
         let user = ext.get::<User>();
-        if user.is_some() {
-            let u = user.unwrap();
+        if let Some(user) = user {
             ok(User {
-                id: u.id,
-                email: u.email.to_string(),
+                id: user.id,
+                email: user.email.to_string(),
             })
         } else {
             err(ErrorBadRequest("DICKHOLE"))
@@ -147,7 +145,7 @@ impl UserFactory {
         }
     }
 
-    pub async fn new(pool: PgPool) -> UserAuth {
+    pub async fn create(pool: PgPool) -> UserAuth {
         let obj_build = UserFactory::build();
         let obj = User::create(&obj_build, pool.borrow()).await.unwrap();
         UserAuth {

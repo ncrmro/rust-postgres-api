@@ -1,15 +1,15 @@
 use std::task::{Context, Poll};
 
 use crate::user::User;
-use actix_http::Extensions;
+
 use actix_service::{Service, Transform};
 
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, web::Data, Error, HttpMessage};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage};
 use futures::future::{ok, LocalBoxFuture, Ready};
 use futures::FutureExt;
 use futures_util::lock::Mutex;
 use sqlx::PgPool;
-use std::rc::Rc;
+
 use std::sync::Arc;
 
 pub struct Viewer;
@@ -57,8 +57,7 @@ where
             .poll_ready(ctx)
     }
 
-    fn call(&mut self, mut req: ServiceRequest) -> Self::Future {
-        println!("Hi from start. You requested: {}", req.path());
+    fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let auth = req.headers().get("Authorization").cloned();
         let conn = req.app_data::<PgPool>().unwrap().get_ref().clone();
 
@@ -72,12 +71,11 @@ where
             }
 
             let token = auth.unwrap().to_str().unwrap().replace("Bearer ", "");
-            match User::verify_token(token, &conn).await {
-                Ok(user) => {
-                    req.extensions_mut().insert(user);
-                }
-                _ => {}
+            let valid = User::verify_token(token, &conn).await;
+            if let Ok(user) = valid {
+                req.extensions_mut().insert(user);
             };
+
             service.call(req).await
         }
         .boxed_local()

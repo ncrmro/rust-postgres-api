@@ -15,7 +15,7 @@ use paperclip::actix::{
     web::{self},
     OpenApiExt,
 };
-use std::sync::Arc;
+
 
 #[api_v2_operation]
 async fn index() -> Result<String, ()> {
