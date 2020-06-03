@@ -38,6 +38,9 @@ we need to set our network to host and have a database live with our migrations.
 If you haven't added a database yet run
 `heroku addons:create heroku-postgresql:hobby-dev`
 
+`heroku config:set APP_AUTH__JWT_SECRET=supersecret`
+`heroku config:set APP_AUTH__PASSWORD_SALT=supersecret`
+
 Finally release
 `heroku container:release web`
 
