@@ -10,3 +10,4 @@ Procfile
 README.md
 tests
 !target/release/planet-express
+!target/release/manage
