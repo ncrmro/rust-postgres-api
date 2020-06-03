@@ -1,13 +1,12 @@
 use actix_web::error::ErrorBadRequest;
-use actix_web::{dev, Error, FromRequest, HttpRequest, HttpResponse, Responder};
+use actix_web::{dev, Error as ActixError, FromRequest, HttpRequest, HttpResponse, Responder};
 
 use anyhow::Result;
 use fake::{faker::internet, Fake};
 
 use futures::future::{err, ok, ready, Ready};
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{PgPool, Row};
+use sqlx::{Error, PgPool};
 
 use crate::user::auth::jwt_verify;
 use argon2::{self, Config};
@@ -28,7 +27,7 @@ pub struct User {
 }
 
 impl FromRequest for User {
-    type Error = Error;
+    type Error = ActixError;
     type Future = Ready<Result<Self, Self::Error>>;
     type Config = ();
 
@@ -53,8 +52,8 @@ pub struct AuthResponse {
 }
 
 impl Responder for User {
-    type Error = Error;
-    type Future = Ready<Result<HttpResponse, Error>>;
+    type Error = ActixError;
+    type Future = Ready<Result<HttpResponse, ActixError>>;
 
     fn respond_to(self, _req: &HttpRequest) -> Self::Future {
         let body = serde_json::to_string(&self).unwrap();
@@ -104,27 +103,24 @@ impl User {
         };
         Ok(user)
     }
-    pub async fn create(obj: &UserAuth, conn: &PgPool) -> Result<User> {
-        let mut tx = conn.begin().await?;
+    pub async fn create(obj: &UserAuth, conn: &PgPool) -> Result<User, Error> {
         let salt = b"randomsalt";
         let hash = argon2::hash_encoded(obj.password.as_ref(), salt, &Config::default()).unwrap();
-        let rec =
-            sqlx::query("INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email")
-                .bind(&obj.email)
-                .bind(hash)
-                .map(|row: PgRow| User {
-                    id: row.get(0),
-                    email: row.get(1),
-                })
-                .fetch_one(&mut tx)
-                .await?;
+        let rec = sqlx::query!(
+            "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email",
+            obj.email,
+            hash
+        )
+        .fetch_one(conn)
+        .await;
 
-        tx.commit().await?;
-        let user = User {
-            id: rec.id,
-            email: rec.email,
-        };
-        Ok(user)
+        match rec {
+            Ok(rec) => Ok(User {
+                id: rec.id,
+                email: rec.email.to_string(),
+            }),
+            Err(e) => err(e).await,
+        }
     }
 }
 
