@@ -19,7 +19,7 @@ services:
     <<: *app-template
     ports:
       - 8000:8000
-  app-test:
+  tests:
     <<: *app-template
     command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
   app-migrations:
