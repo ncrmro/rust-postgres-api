@@ -1,9 +1,9 @@
 use clap::Clap;
 use futures::executor::block_on;
 use planet_express::db::init_db;
+use planet_express::http::server;
 use planet_express::settings::Settings;
 use planet_express::user::{User, UserAuth};
-
 #[derive(Clap)]
 #[clap(version = "1.0", author = "Nicholas R. <ncrmro@gmail.com>")]
 struct Opts {
@@ -15,6 +15,15 @@ struct Opts {
 enum SubCommand {
     #[clap(version = "1.0", author = "Nicholas R. <ncrmro@gmail.com>")]
     Createuser(Createuser),
+    Runserver(Runserver),
+}
+
+#[derive(Clap)]
+struct Runserver {
+    #[clap(short, long)]
+    host: String,
+    #[clap(short, long)]
+    port: String,
 }
 
 /// A subcommand for controlling testing
@@ -50,5 +59,7 @@ fn main() {
 
     match opts.subcmd {
         SubCommand::Createuser(args) => block_on(create_user(args, settings)),
+        SubCommand::Runserver(args) => (server(settings)),
+        _ => {}
     }
 }
