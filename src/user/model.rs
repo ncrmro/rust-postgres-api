@@ -117,7 +117,7 @@ impl User {
         match rec {
             Ok(rec) => Ok(User {
                 id: rec.id,
-                email: rec.email.to_string(),
+                email: rec.email,
             }),
             Err(e) => err(e).await,
         }
