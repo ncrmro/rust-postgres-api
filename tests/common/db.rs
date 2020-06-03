@@ -101,7 +101,9 @@ async fn create_schema(mut conn: &mut PgConnection, name: String) -> String {
 }
 
 pub async fn init(settings: Settings, test_name: String) -> Pool<PgConnection> {
-    create_testdb(&settings).await;
+    START.call_once(|| {
+        block_on(create_testdb(&settings));
+    });
 
     let test_url = format!("{}_test", settings.database.database_url);
     let mut conn = PgConnection::connect(&test_url).await.unwrap();
