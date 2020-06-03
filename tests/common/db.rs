@@ -1,4 +1,3 @@
-use anyhow::Result;
 use fancy_regex::Regex;
 use futures::executor::block_on;
 use planet_express::settings::Settings;
