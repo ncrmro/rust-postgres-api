@@ -68,6 +68,8 @@ jobs:
         run: docker-compose run app-migrations
       - name: Compile binary
         run: docker-compose run app cargo build --release
+      - name: Compile manage binary
+        run: docker-compose run app cargo build --release --bin manage
       - name: Build release image
         run: docker build --tag web . && docker tag web $IMAGE_BASE/web
       - name: Set up Heroku
