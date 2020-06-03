@@ -47,8 +47,8 @@ async fn create_user(args: Createuser, settings: Settings) {
 
     let r = User::create(&obj, &conn.clone()).await;
     match r {
-        Ok(user) => println!("Printing debug info... {}", user.email),
-        _ => println!("No user!"),
+        Ok(user) => println!("User successfully created {}", user.email),
+        Err(e) => println!("{}", e),
     }
 }
 
