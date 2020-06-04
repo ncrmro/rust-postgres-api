@@ -3,7 +3,7 @@ use futures::executor::block_on;
 use planet_express::db::init_db;
 use planet_express::init;
 use planet_express::settings::Settings;
-use planet_express::user::{User, UserAuth};
+use planet_express::user::{User, UserRequest};
 #[derive(Clap)]
 #[clap(version = "1.0", author = "Nicholas R. <ncrmro@gmail.com>")]
 struct Opts {
@@ -37,15 +37,16 @@ struct Createuser {
     // superuser: Option<bool>,
 }
 
+//changeme
 async fn create_user(args: Createuser, settings: Settings) {
     let conn = init_db(&settings.database).await.unwrap();
-    let obj = UserAuth {
-        id: None,
+    let obj = UserRequest {
         email: args.email,
         password: args.password,
+        image: None,
     };
 
-    let r = User::create(&obj, &conn.clone()).await;
+    let r = User::create(obj, &conn).await;
     match r {
         Ok(user) => println!("User successfully created {}", user.email),
         Err(e) => println!("{}", e),

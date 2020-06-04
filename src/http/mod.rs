@@ -8,6 +8,7 @@ use crate::user::User;
 use actix_web::middleware::Logger;
 use actix_web::{guard, App, HttpServer};
 use anyhow::Result;
+use chrono::prelude::*;
 use env_logger::Env;
 use listenfd::ListenFd;
 use paperclip::actix::{
@@ -15,7 +16,6 @@ use paperclip::actix::{
     web::{self},
     OpenApiExt,
 };
-
 
 #[api_v2_operation]
 async fn index() -> Result<String, ()> {
@@ -50,6 +50,10 @@ pub async fn server(settings: Settings) -> Result<()> {
             .data(User {
                 id: 0,
                 email: "".to_string(),
+                password: "".to_string(),
+                image: None,
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
             })
             .wrap(Logger::default())
             .wrap(middlewares::Viewer)

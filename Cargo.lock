@@ -582,6 +582,7 @@ checksum = "80094f509cf8b5ae86a4966a39b3ff66cd7e2a3e594accec3743ff3fabeab5b2"
 dependencies = [
  "num-integer",
  "num-traits 0.2.11",
+ "serde 1.0.110",
  "time",
 ]
 
@@ -1748,6 +1749,7 @@ source = "git+https://github.com/wafflespeanut/paperclip?rev=d3f2a950efa35b2496c
 dependencies = [
  "actix-http",
  "actix-web",
+ "chrono",
  "failure",
  "lazy_static",
  "mime 0.4.0-a.0",

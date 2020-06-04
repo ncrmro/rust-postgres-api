@@ -1,11 +1,13 @@
-extern crate fake;
+// extern crate fake;
 extern crate planet_express;
 
 mod common;
+mod users;
+
 // use actix_web::http::StatusCode;
 use actix_web::test;
 use actix_web::test::{read_response, TestRequest};
-use planet_express::user::{AuthResponse, User, UserAuth};
+use planet_express::user::{AuthResponse, User};
 
 #[actix_rt::test]
 async fn test_index_get() {
@@ -37,11 +39,7 @@ async fn test_auth_viewer_authenticate() {
     let obj = planet_express::user::UserFactory::create(db_conn.clone()).await;
     let req = TestRequest::post()
         .uri("/v1/viewer/authenticate")
-        .set_json(&UserAuth {
-            id: None,
-            email: obj.email.clone(),
-            password: obj.password,
-        })
+        .set_json(&obj)
         .to_request();
 
     let res: AuthResponse = test::read_response_json(&mut srv, req).await;

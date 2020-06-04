@@ -9,6 +9,7 @@ pub mod db;
 use planet_express::settings::Settings;
 use std::iter;
 
+use chrono::Utc;
 use planet_express::user::User;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -16,8 +17,12 @@ use sqlx::{PgConnection, Pool};
 
 async fn user() -> Result<User, ()> {
     Ok(User {
-        id: 666,
+        id: 0,
         email: "".to_string(),
+        password: "".to_string(),
+        image: None,
+        created_at: Utc::now(),
+        updated_at: Utc::now(),
     })
 }
 pub async fn setup() -> (
