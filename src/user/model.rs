@@ -110,9 +110,7 @@ impl User {
         .await;
         match rec {
             Ok(user) => Ok(user),
-            Err(e) => {
-                return Err(e);
-            }
+            Err(e) => Err(e),
         }
     }
 
