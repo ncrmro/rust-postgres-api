@@ -1,4 +1,4 @@
-use crate::user::{AuthResponse, User, UserAuth};
+use crate::user::{AuthResponse, User, UserRequest};
 use actix_http::error::{Error, ErrorBadRequest};
 use actix_web::web::Data;
 use paperclip::actix::web::HttpRequest;
@@ -19,10 +19,10 @@ async fn viewer(
 
 #[api_v2_operation]
 async fn create(
-    user: web::Json<UserAuth>,
+    user: web::Json<UserRequest>,
     db_pool: Data<PgPool>,
 ) -> Result<web::Json<AuthResponse>, ()> {
-    let user = User::create(&user.into_inner(), db_pool.get_ref())
+    let user = User::create(user.into_inner(), db_pool.get_ref())
         .await
         .unwrap();
     let res = AuthResponse {
@@ -34,12 +34,13 @@ async fn create(
 
 #[api_v2_operation]
 async fn authenticate(
-    user: web::Json<UserAuth>,
+    user: web::Json<UserRequest>,
     db_pool: Data<PgPool>,
 ) -> Result<web::Json<AuthResponse>, ()> {
     let user = User::authenticate(user.into_inner(), db_pool.get_ref())
         .await
         .unwrap();
+
     let res = AuthResponse {
         token: super::auth::jwt_get(user.id),
         user,

@@ -6,24 +6,29 @@ use fake::{faker::internet, Fake};
 
 use futures::future::{err, ok, ready, Ready};
 use serde::{Deserialize, Serialize};
-use sqlx::{Error, PgPool};
+use sqlx::{Error, FromRow, PgPool};
 
 use crate::user::auth::jwt_verify;
 use argon2::{self, Config};
 use paperclip::actix::Apiv2Schema;
-use std::borrow::Borrow;
 
-#[derive(Serialize, Deserialize, Apiv2Schema)]
-pub struct UserAuth {
-    pub id: Option<i32>,
+use sqlx::types::chrono::{DateTime, Utc};
+
+#[derive(Serialize, Deserialize, Clone, Apiv2Schema)]
+pub struct UserRequest {
     pub email: String,
     pub password: String,
+    pub image: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Apiv2Schema)]
+#[derive(Serialize, Deserialize, FromRow, Apiv2Schema, Debug, Clone)]
 pub struct User {
     pub id: i32,
     pub email: String,
+    pub password: String,
+    pub image: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 impl FromRequest for User {
@@ -35,17 +40,14 @@ impl FromRequest for User {
         let ext = req.extensions();
         let user = ext.get::<User>();
         if let Some(user) = user {
-            ok(User {
-                id: user.id,
-                email: user.email.to_string(),
-            })
+            ok(user.clone())
         } else {
             err(ErrorBadRequest("DICKHOLE"))
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Apiv2Schema)]
+#[derive(Serialize, Deserialize, Clone, Apiv2Schema)]
 pub struct AuthResponse {
     pub token: String,
     pub user: User,
@@ -71,77 +73,75 @@ impl User {
         if claims.is_err() {
             return Err(false);
         }
-        let row = sqlx::query!(
-            "SELECT id, email, password FROM users WHERE id = $1",
-            claims.unwrap().user_id
-        )
-        .fetch_one(conn)
-        .await;
+        let rec = User::get_by_id(claims.unwrap().user_id, conn).await;
 
-        match row {
-            Ok(user) => Ok(User {
-                id: user.id,
-                email: user.email,
-            }),
+        match rec {
+            Ok(user) => Ok(user),
             Err(_err) => Err(false),
         }
     }
 
-    pub async fn authenticate(obj: UserAuth, conn: &PgPool) -> Result<User> {
-        let email = obj.email;
-        let rec = sqlx::query!(
-            "SELECT id, email, password FROM users WHERE email = $1",
-            email
-        )
-        .fetch_one(conn)
-        .await?;
-        let matches = argon2::verify_encoded(&rec.password, obj.password.as_ref()).unwrap();
-        assert!(matches);
-        let user = User {
-            id: rec.id,
-            email: rec.email,
-        };
+    pub async fn authenticate(obj: UserRequest, conn: &PgPool) -> Result<User, &str> {
+        #[derive(Debug, Clone)]
+        struct DoubleError;
+
+        let query = User::get_by_email(obj.email, conn).await;
+        if query.is_err() {
+            return Err("User not found");
+        }
+        let user = query.unwrap();
+        if argon2::verify_encoded(&user.password, obj.password.as_ref()).is_err() {
+            return Err("Password is incorrect");
+        }
+
         Ok(user)
     }
-    pub async fn create(obj: &UserAuth, conn: &PgPool) -> Result<User, Error> {
+    pub async fn create(obj: UserRequest, conn: &PgPool) -> Result<User, Error> {
         let salt = b"randomsalt";
         let hash = argon2::hash_encoded(obj.password.as_ref(), salt, &Config::default()).unwrap();
-        let rec = sqlx::query!(
-            "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email",
+        let rec = sqlx::query_as!(
+            User,
+            "INSERT INTO users (email, image, password) VALUES ($1, $2, $3) RETURNING *",
             obj.email,
-            hash
+            obj.image,
+            hash,
         )
         .fetch_one(conn)
         .await;
-
         match rec {
-            Ok(rec) => Ok(User {
-                id: rec.id,
-                email: rec.email,
-            }),
-            Err(e) => err(e).await,
+            Ok(user) => Ok(user),
+            Err(e) => Err(e),
         }
+    }
+
+    pub async fn get_by_id(id: i32, pool: &PgPool) -> Result<User, Error> {
+        let rec = sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", id)
+            .fetch_one(&*pool)
+            .await?;
+        Ok(rec)
+    }
+
+    pub async fn get_by_email(email: String, pool: &PgPool) -> Result<User, Error> {
+        let rec = sqlx::query_as!(User, "SELECT * FROM users WHERE email = $1", email)
+            .fetch_one(&*pool)
+            .await?;
+        Ok(rec)
     }
 }
 
 pub struct UserFactory {}
 
 impl UserFactory {
-    pub fn build() -> UserAuth {
-        UserAuth {
-            id: None,
+    pub fn build() -> UserRequest {
+        UserRequest {
             email: internet::en::FreeEmail().fake(),
             password: "testpassword".to_string(),
+            image: None,
         }
     }
 
-    pub async fn create(pool: PgPool) -> UserAuth {
+    pub async fn create(pool: PgPool) -> User {
         let obj_build = UserFactory::build();
-        let obj = User::create(&obj_build, pool.borrow()).await.unwrap();
-        UserAuth {
-            id: None,
-            email: obj.email,
-            password: obj_build.password,
-        }
+        User::create(obj_build, &pool).await.unwrap()
     }
 }
