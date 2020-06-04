@@ -8,12 +8,21 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: /var/lib/docker/volumes/planet-express_cargo-cache/_data
+          path: ./cache/cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v2
         with:
-          path: /var/lib/docker/volumes/planet-express_target-cache/_data
+          path: ./cache/target
           key: ${{ runner.os }}-target-debug-${{ hashFiles('**/Cargo.lock') }}
+      - name: Load cache
+        run: >
+          docker volume create planet-express_cargo-cache && \
+          docker volume create planet-express_target-cache && \
+          docker run --rm \
+          -v planet-express_cargo-cache:/cache/cargo \
+          -v planet-express_target-cache:/cache/target \
+          -v $(pwd)/cache:/in \
+          alpine cp -a /in/. /cache
       - name: Docker complains if .env not present
         run: cp .env.example .env
       - name: Pull images
@@ -28,6 +37,15 @@ jobs:
         run: docker-compose run app cargo clippy -- -D warnings
       - name: Test
         run: docker-compose run app cargo test
+      - name: Chown cache files
+        run: sudo chown -R "$(whoami)" ./target
+      - name: Download cache out of container
+        run: >
+          docker run --rm \
+          -v planet-express_cargo-cache:/cache/cargo \
+          -v planet-express_target-cache:/cache/target \
+          -v $(pwd)/cache:/out \
+          alpine mv /cache /out
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
@@ -38,14 +56,21 @@ jobs:
       IMAGE_BASE: registry.heroku.com/planetexpres
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: /var/lib/docker/volumes/planet-express_cargo-cache/_data
+          path: ./cache/cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v2
         with:
-          path: /var/lib/docker/volumes/planet-express_target-cache/_data
+          path: ./cache/target
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
+      - name: Load cache
+        run: >
+          docker volume create planet-express_cargo-cache && \
+          docker volume create planet-express_target-cache && \
+          docker run --rm \
+          -v planet-express_cargo-cache:/cache/cargo \
+          -v planet-express_target-cache:/cache/target \
+          -v $(pwd)/cache:/in \
+          alpine cp -a /in/. /cache
       - name: Docker compose version
         run: docker-compose version
       - name: Docker complains if .env not present
@@ -60,6 +85,13 @@ jobs:
         run: docker-compose run app cargo build --release
       - name: Compile manage binary
         run: docker-compose run app cargo build --release --bin manage
+      - name: Download cache out of container, as we also need binarys for docker build
+        run: >
+          docker run --rm \
+          -v planet-express_cargo-cache:/cache/cargo \
+          -v planet-express_target-cache:/cache/target \
+          -v $(pwd)/cache:/out \
+          alpine mv /cache /out
       - name: Build release image
         run: docker build --tag web . && docker tag web $IMAGE_BASE/web
       - name: Set up Heroku
@@ -72,4 +104,6 @@ jobs:
         run: heroku container:release web
       - name: Run migrations
         run: heroku run bash -c "cd / && sqlx mig run"
+      - name: Chown cache files
+        run: sudo chown -R "$(whoami)" ./target
 
