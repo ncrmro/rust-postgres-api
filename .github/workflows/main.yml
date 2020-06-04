@@ -8,15 +8,11 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/.cargo
+          path: /var/lib/docker/volumes/planet-express_cargo-cache/_data
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/debug
-            ./target/.rustc_info.json
-            !./target/.cargo
+          path: /var/lib/docker/volumes/planet-express_target-cache/_data
           key: ${{ runner.os }}-target-debug-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker complains if .env not present
         run: cp .env.example .env
@@ -32,8 +28,6 @@ jobs:
         run: docker-compose run app cargo clippy -- -D warnings
       - name: Test
         run: docker-compose run app cargo test
-      - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./target
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
@@ -46,15 +40,11 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/.cargo
+          path: /var/lib/docker/volumes/planet-express_cargo-cache/_data
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/release
-            ./target/.rustc_info.json
-            !./target/.cargo
+          path: /var/lib/docker/volumes/planet-express_target-cache/_data
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker compose version
         run: docker-compose version
@@ -82,5 +72,4 @@ jobs:
         run: heroku container:release web
       - name: Run migrations
         run: heroku run bash -c "cd / && sqlx mig run"
-      - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./target
+
