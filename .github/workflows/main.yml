@@ -30,7 +30,7 @@ jobs:
           -v planet-express_cargo-cache:/cache/cargo
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/in
-          app sh -c "rsync -aW --no-compress  /in/target/ /cache/target && cp -a /in/cargo/ /cache/cargo"      - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
+          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
         run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
@@ -84,7 +84,7 @@ jobs:
           -v planet-express_cargo-cache:/cache/cargo
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/in
-          app sh -c "rsync -aW --no-compress  /in/target/ /cache/target && cp -a /in/cargo/ /cache/cargo"      - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
+          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Compile binary
         run: docker-compose run app cargo build --release
       - name: Compile manage binary
@@ -96,6 +96,8 @@ jobs:
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/out
           tests sh -c "rsync -aW --no-compress /usr/local/cargo/ /out/cargo && rsync -a /app/target/ /out/target"
+      - name: Chown cache files
+        run: sudo chown -R "$(whoami)" $(pwd)/cache
       - name: Build release image
         run: docker build --tag web . && docker tag web $IMAGE_BASE/web
       - name: Set up Heroku
