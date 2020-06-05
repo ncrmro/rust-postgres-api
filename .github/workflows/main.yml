@@ -56,6 +56,7 @@ jobs:
       IMAGE_BASE: registry.heroku.com/planetexpres
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v2
         with:
           path: ./cache/cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
