@@ -38,7 +38,7 @@ jobs:
       - name: Test
         run: docker-compose run app cargo test
       - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./cache
+        run: sudo chown -R "$(whoami)" $(pwd)/cache
       - name: Download cache out of container
         run: >
           docker-compose run --rm
@@ -46,6 +46,10 @@ jobs:
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/out
           tests sh -c "cp -a /usr/local/cargo/. /out/cargo && cp -a /app/target/. /out/target"
+      - name: ls
+        run: ls -la $(pwd)/cache
+      - name: ls
+        run: ls -la $(pwd)/cache/target
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
@@ -106,5 +110,5 @@ jobs:
       - name: Run migrations
         run: heroku run bash -c "cd / && sqlx mig run"
       - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./cache
+        run: sudo chown -R "$(whoami)" $(pwd)/cache
 
