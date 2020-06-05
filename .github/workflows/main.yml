@@ -46,10 +46,8 @@ jobs:
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/out
           tests sh -c "cp -a /usr/local/cargo/. /out/cargo && cp -a /app/target/. /out/target"
-      - name: ls
-        run: ls -la $(pwd)/cache
-      - name: ls
-        run: ls -la $(pwd)/cache/target
+      - name: Chown cache files
+        run: sudo chown -R "$(whoami)" $(pwd)/cache
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
