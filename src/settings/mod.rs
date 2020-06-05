@@ -4,14 +4,8 @@ use std::env;
 #[derive(Debug, Deserialize)]
 pub struct Database {
     pub database_url: String,
+    pub sslmode: bool,
 }
-
-// #[derive(Debug, Deserialize)]
-// pub struct Auth {
-//     pub secret: String,
-//     pub issuer: String,
-//     pub expiry: i64,
-// }
 
 #[derive(Debug, Deserialize)]
 pub struct HTTP {
