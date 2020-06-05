@@ -28,7 +28,7 @@ jobs:
           -v planet-express_cargo-cache:/cache/cargo
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/in
-          alpine sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
+          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
         run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
@@ -67,7 +67,7 @@ jobs:
           -v planet-express_cargo-cache:/cache/cargo
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/in
-          alpine sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
+          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Docker compose version
         run: docker-compose version
       - name: Docker complains if .env not present
