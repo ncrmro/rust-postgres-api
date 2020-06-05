@@ -70,4 +70,3 @@ copy binary directly from volume.
 ```bash
 docker build --target built
 ```
-
