@@ -38,7 +38,7 @@ jobs:
       - name: Test
         run: docker-compose run app cargo test
       - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./target
+        run: sudo chown -R "$(whoami)" ./cache
       - name: Download cache out of container
         run: >
           docker-compose run --rm
@@ -106,5 +106,5 @@ jobs:
       - name: Run migrations
         run: heroku run bash -c "cd / && sqlx mig run"
       - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./target
+        run: sudo chown -R "$(whoami)" ./cache
 
