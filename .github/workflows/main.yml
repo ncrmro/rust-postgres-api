@@ -62,6 +62,7 @@ jobs:
           path: ./cache/target
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
       - name: Load cache
+        run: >
           docker run --rm \
           -v planet-express_cargo-cache:/cache/cargo \
           -v planet-express_target-cache:/cache/target \
