@@ -8,15 +8,11 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/.cargo
+          path: ./cache/cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/debug
-            ./target/.rustc_info.json
-            !./target/.cargo
+          path: ./cache/target
           key: ${{ runner.os }}-target-debug-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker complains if .env not present
         run: cp .env.example .env
@@ -26,6 +22,15 @@ jobs:
         run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
+      - name: Make cache dirs to stop fails
+        run: mkdir -p cache/cargo && mkdir -p cache/target
+      - name: Load cache
+        run: >
+          docker-compose run --rm
+          -v planet-express_cargo-cache:/cache/cargo
+          -v planet-express_target-cache:/cache/target
+          -v $(pwd)/cache:/in
+          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
         run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
@@ -33,7 +38,14 @@ jobs:
       - name: Test
         run: docker-compose run app cargo test
       - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./target
+        run: sudo chown -R "$(whoami)" ./cache
+      - name: Download cache out of container
+        run: >
+          docker-compose run --rm
+          -v planet-express_cargo-cache:/cache/cargo
+          -v planet-express_target-cache:/cache/target
+          -v $(pwd)/cache:/out
+          tests sh -c "cp -a /usr/local/cargo/. /out/cargo && cp -a /app/target/. /out/target"
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
@@ -44,17 +56,12 @@ jobs:
       IMAGE_BASE: registry.heroku.com/planetexpres
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
         with:
-          path: |
-            ./target/.cargo
+          path: ./cache/cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v2
         with:
-          path: |
-            ./target/release
-            ./target/.rustc_info.json
-            !./target/.cargo
+          path: ./cache/target
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker compose version
         run: docker-compose version
@@ -66,10 +73,26 @@ jobs:
         run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose run app-migrations
+      - name: Make cache dirs to stop fails
+        run: mkdir -p cache/cargo && mkdir -p cache/target
+      - name: Load cache
+        run: >
+          docker-compose run --rm
+          -v planet-express_cargo-cache:/cache/cargo
+          -v planet-express_target-cache:/cache/target
+          -v $(pwd)/cache:/in
+          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Compile binary
         run: docker-compose run app cargo build --release
       - name: Compile manage binary
         run: docker-compose run app cargo build --release --bin manage
+      - name: Download cache out of container, as we also need binarys for docker build
+        run: >
+          docker-compose run --rm
+          -v planet-express_cargo-cache:/cache/cargo
+          -v planet-express_target-cache:/cache/target
+          -v $(pwd)/cache:/out
+          tests sh -c "cp -a /usr/local/cargo/. /out/cargo && cp -a /app/target/. /out/target"
       - name: Build release image
         run: docker build --tag web . && docker tag web $IMAGE_BASE/web
       - name: Set up Heroku
@@ -83,4 +106,5 @@ jobs:
       - name: Run migrations
         run: heroku run bash -c "cd / && sqlx mig run"
       - name: Chown cache files
-        run: sudo chown -R "$(whoami)" ./target
+        run: sudo chown -R "$(whoami)" ./cache
+
