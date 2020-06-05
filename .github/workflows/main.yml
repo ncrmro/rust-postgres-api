@@ -31,6 +31,7 @@ jobs:
           -v planet-express_target-cache:/cache/target
           -v $(pwd)/cache:/in
           app sh -c "rsync -aW --no-compress  /in/target/ /cache/target && cp -a /in/cargo/ /cache/cargo"      - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
+      - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
         run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
         run: docker-compose run app cargo clippy -- -D warnings
