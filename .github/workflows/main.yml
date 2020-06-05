@@ -14,15 +14,6 @@ jobs:
         with:
           path: ./cache/target
           key: ${{ runner.os }}-target-debug-${{ hashFiles('**/Cargo.lock') }}
-      - name: Load cache
-        run: >
-          docker volume create planet-express_cargo-cache && \
-          docker volume create planet-express_target-cache && \
-          docker run --rm \
-          -v planet-express_cargo-cache:/cache/cargo \
-          -v planet-express_target-cache:/cache/target \
-          -v $(pwd)/cache:/in \
-          alpine cp -a /in/. /cache
       - name: Docker complains if .env not present
         run: cp .env.example .env
       - name: Pull images
@@ -31,6 +22,13 @@ jobs:
         run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
+      - name: Load cache
+        run: >
+          docker run --rm \
+          -v planet-express_cargo-cache:/cache/cargo \
+          -v planet-express_target-cache:/cache/target \
+          -v $(pwd)/cache:/in \
+          alpine sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
         run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
@@ -41,11 +39,11 @@ jobs:
         run: sudo chown -R "$(whoami)" ./target
       - name: Download cache out of container
         run: >
-          docker run --rm \
+          docker-compose run --rm \
           -v planet-express_cargo-cache:/cache/cargo \
           -v planet-express_target-cache:/cache/target \
           -v $(pwd)/cache:/out \
-          alpine mv /cache /out
+          tests sh -c "cp -a /usr/local/cargo/. /out/cargo && cp -a /app/target/. /out/target"
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
@@ -64,14 +62,11 @@ jobs:
           path: ./cache/target
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
       - name: Load cache
-        run: >
-          docker volume create planet-express_cargo-cache && \
-          docker volume create planet-express_target-cache && \
           docker run --rm \
           -v planet-express_cargo-cache:/cache/cargo \
           -v planet-express_target-cache:/cache/target \
           -v $(pwd)/cache:/in \
-          alpine cp -a /in/. /cache
+          alpine sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Docker compose version
         run: docker-compose version
       - name: Docker complains if .env not present
@@ -88,11 +83,11 @@ jobs:
         run: docker-compose run app cargo build --release --bin manage
       - name: Download cache out of container, as we also need binarys for docker build
         run: >
-          docker run --rm \
+          docker-compose run --rm \
           -v planet-express_cargo-cache:/cache/cargo \
           -v planet-express_target-cache:/cache/target \
           -v $(pwd)/cache:/out \
-          alpine mv /cache /out
+          tests sh -c "cp -a /usr/local/cargo/. /out/cargo && cp -a /app/target/. /out/target"
       - name: Build release image
         run: docker build --tag web . && docker tag web $IMAGE_BASE/web
       - name: Set up Heroku
