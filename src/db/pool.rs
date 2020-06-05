@@ -9,10 +9,12 @@ use sqlx::{
 pub async fn init_db(
     database_config: &settings::Database,
 ) -> Result<Pool<PgConnection>, error::Error> {
-    let mut url = &database_config.database_url;
-    if database_config.sslmode {
-        url = &format!("{}?sslmode=require", url);
-    }
-
-    PgPool::new(&database_config.database_url).await
+    let url = &database_config.database_url;
+    let ssl = format!("{}?sslmode=require", &url).clone();
+    let conn = if database_config.sslmode {
+        PgPool::new(&ssl)
+    } else {
+        PgPool::new(url)
+    };
+    conn.await
 }
