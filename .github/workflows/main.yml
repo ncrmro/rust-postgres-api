@@ -24,7 +24,7 @@ jobs:
         run: docker-compose up --exit-code-from app-migrations app-migrations
       - name: Load cache
         run: >
-          docker run --rm \
+          docker-compose run --rm \
           -v planet-express_cargo-cache:/cache/cargo \
           -v planet-express_target-cache:/cache/target \
           -v $(pwd)/cache:/in \
@@ -63,7 +63,7 @@ jobs:
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
       - name: Load cache
         run: >
-          docker run --rm \
+          docker-compose run --rm \
           -v planet-express_cargo-cache:/cache/cargo \
           -v planet-express_target-cache:/cache/target \
           -v $(pwd)/cache:/in \
