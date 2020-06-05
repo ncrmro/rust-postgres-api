@@ -29,4 +29,5 @@ COPY --from=watcher_build /usr/local/cargo/bin/systemfd /usr/local/bin/systemfd
 COPY --from=watcher_build /usr/local/cargo/bin/cargo-watch /usr/local/bin/cargo-watch
 COPY --from=sqlx /usr/local/bin/sqlx /usr/local/bin/sqlx
 RUN rustup component add clippy
+RUN apt update && apt install rsync -y && rm -rf /var/lib/apt/lists/*
 CMD ["systemfd", "--no-pid", "-s", "http::0.0.0.0:8000", "--", "cargo", "watch", "--watch", "src", "--exec", "run"]
