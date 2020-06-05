@@ -22,6 +22,8 @@ jobs:
         run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose up --exit-code-from app-migrations app-migrations
+      - name: Make cache dirs to stop fails
+        run: mkdir -p cache/cargo && mkdir -p cache/target
       - name: Load cache
         run: >
           docker-compose run --rm
@@ -61,13 +63,6 @@ jobs:
         with:
           path: ./cache/target
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
-      - name: Load cache
-        run: >
-          docker-compose run --rm
-          -v planet-express_cargo-cache:/cache/cargo
-          -v planet-express_target-cache:/cache/target
-          -v $(pwd)/cache:/in
-          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Docker compose version
         run: docker-compose version
       - name: Docker complains if .env not present
@@ -78,6 +73,15 @@ jobs:
         run: docker-compose up -d db
       - name: Migrate database
         run: docker-compose run app-migrations
+      - name: Make cache dirs to stop fails
+        run: mkdir -p cache/cargo && mkdir -p cache/target
+      - name: Load cache
+        run: >
+          docker-compose run --rm
+          -v planet-express_cargo-cache:/cache/cargo
+          -v planet-express_target-cache:/cache/target
+          -v $(pwd)/cache:/in
+          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
       - name: Compile binary
         run: docker-compose run app cargo build --release
       - name: Compile manage binary
