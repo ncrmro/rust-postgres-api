@@ -65,6 +65,8 @@ jobs:
           key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
       - name: Docker compose version
         run: docker-compose version
+      - name: ls
+        run: ls
       - name: Docker complains if .env not present
         run: cp .env.example .env
       - name: Pull images
