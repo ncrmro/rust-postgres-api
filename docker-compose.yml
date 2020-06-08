@@ -22,7 +22,7 @@ services:
   tests:
     <<: *app-template
     command: cargo watch --watch src --watch tests --exec 'test -- --nocapture'
-  app-migrations:
+  migrations:
     <<: *app-template
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 3; done; sqlx mig run'
     volumes:
