@@ -111,9 +111,15 @@ pub async fn init(settings: Settings, test_name: String) -> Pool<PgConnection> {
     let schema_name = create_schema(&mut conn, test_name).await;
     conn.close();
 
-    PgPool::new(format!("{}?schema={}", &test_url, schema_name).as_ref())
+    let conn = PgPool::new(format!("{}?schema={}", &test_url, schema_name).as_ref())
         .await
-        .unwrap()
+        .unwrap();
+
+    sqlx::query(format!("SET search_path to {};", schema_name).as_ref())
+        .execute(&conn)
+        .await
+        .unwrap();
+    conn
 }
 
 pub async fn down(settings: Settings, test_id: String) {
