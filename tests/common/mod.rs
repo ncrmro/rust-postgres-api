@@ -6,7 +6,7 @@ use actix_web::{test, App, Error};
 use paperclip::actix::OpenApiExt;
 pub mod db;
 
-use planet_express::settings::Settings;
+use planet_express::core::settings::Settings;
 use std::iter;
 
 use chrono::Utc;
@@ -41,9 +41,9 @@ pub async fn setup() -> (
     let app = App::new()
         .data(db_conn.clone()) // pass database pool to application so we can access it inside handlers
         .data_factory(user)
-        .wrap(planet_express::http::middlewares::Viewer)
+        .wrap(planet_express::core::http::middlewares::Viewer)
         .wrap_api()
-        .configure(planet_express::http::routes)
+        .configure(planet_express::core::http::routes)
         .build();
 
     (test::init_service(app).await, db_conn, test_name)

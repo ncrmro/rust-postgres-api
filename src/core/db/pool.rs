@@ -1,4 +1,4 @@
-use crate::settings;
+use crate::core::settings;
 use anyhow::Result;
 use sqlx::{
     error,

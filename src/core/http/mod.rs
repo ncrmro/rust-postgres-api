@@ -1,7 +1,7 @@
 pub mod middlewares;
 
-use crate::db::init_db;
-use crate::settings::Settings;
+use crate::core::db::init_db;
+use crate::core::settings::Settings;
 use crate::todo;
 use crate::user;
 use crate::user::User;
