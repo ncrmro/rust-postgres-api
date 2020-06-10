@@ -18,24 +18,11 @@ use paperclip::actix::{
 };
 
 #[api_v2_operation]
-async fn index() -> Result<String, ()> {
-    Ok("Hello World".to_string())
-}
-
-#[api_v2_operation]
 async fn p404() -> Result<String, ()> {
     Ok("404".to_string())
 }
 
-pub fn routes(cfg: &mut web::ServiceConfig) {
-    let v1 = web::scope("/v1")
-        .configure(todo::init)
-        .configure(user::init);
-
-    cfg.route("/", web::get().to(index)).service(v1);
-}
-
-pub async fn server(settings: Settings) -> Result<()> {
+pub async fn server(settings: Settings, routes: fn(&mut web::ServiceConfig)) -> Result<()> {
     // this will enable us to keep application running during recompile: systemfd --no-pid -s http::5000 -- cargo watch -x run
     let mut listenfd = ListenFd::from_env();
 

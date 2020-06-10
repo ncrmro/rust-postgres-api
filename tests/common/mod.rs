@@ -43,7 +43,7 @@ pub async fn setup() -> (
         .data_factory(user)
         .wrap(planet_express::core::http::middlewares::Viewer)
         .wrap_api()
-        .configure(planet_express::core::http::routes)
+        .configure(planet_express::routes)
         .build();
 
     (test::init_service(app).await, db_conn, test_name)
