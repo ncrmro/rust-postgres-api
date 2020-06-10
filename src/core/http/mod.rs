@@ -2,8 +2,6 @@ pub mod middlewares;
 
 use crate::core::db::init_db;
 use crate::core::settings::Settings;
-use crate::todo;
-use crate::user;
 use crate::user::User;
 use actix_web::middleware::Logger;
 use actix_web::{guard, App, HttpServer};
