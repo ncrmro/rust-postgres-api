@@ -21,7 +21,7 @@ jobs:
       - name: Bring up the database
         run: docker-compose up -d db
       - name: Migrate database
-        run: docker-compose up --exit-code-from app-migrations app-migrations
+        run: docker-compose up --exit-code-from migrations migrations
       - name: Make cache dirs to stop fails
         run: mkdir -p cache/cargo && mkdir -p cache/target
       - name: Load cache
@@ -75,7 +75,7 @@ jobs:
       - name: Bring up the database
         run: docker-compose up -d db
       - name: Migrate database
-        run: docker-compose run app-migrations
+        run: docker-compose run migrations
       - name: Make cache dirs to stop fails
         run: mkdir -p cache/cargo && mkdir -p cache/target
       - name: Load cache

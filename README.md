@@ -18,6 +18,14 @@ Creating a new migration
 Running migrations
 `dc exec app sqlx mig run`
 
+Iterating on Schema
+```
+dc down && \
+docker volume rm planet-express_pgdata && \
+dc up migrations && \
+dc up tests
+```
+
 ## Testing
 
 `dc exec app cargo test`

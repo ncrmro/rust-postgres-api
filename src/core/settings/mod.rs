@@ -1,4 +1,5 @@
 use config::{Config, ConfigError, Environment, File};
+use dotenv::dotenv;
 use std::env;
 
 #[derive(Debug, Deserialize)]
@@ -28,6 +29,7 @@ pub struct Settings {
 
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
+        dotenv().ok();
         // HEROKU
         // These env vars are automatically set by Heroku
         // DATABASE_URL is also used by SQLx and is required a compile time to check SQL

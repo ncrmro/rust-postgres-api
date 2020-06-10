@@ -1,6 +1,6 @@
 use fancy_regex::Regex;
 use futures::executor::block_on;
-use planet_express::settings::Settings;
+use planet_express::core::settings::Settings;
 use sqlx::{query, Connect, Connection, PgConnection, PgPool, Pool};
 use std::fs;
 use std::sync::Once;
@@ -111,9 +111,15 @@ pub async fn init(settings: Settings, test_name: String) -> Pool<PgConnection> {
     let schema_name = create_schema(&mut conn, test_name).await;
     conn.close();
 
-    PgPool::new(format!("{}?schema={}", &test_url, schema_name).as_ref())
+    let conn = PgPool::new(format!("{}?schema={}", &test_url, schema_name).as_ref())
         .await
-        .unwrap()
+        .unwrap();
+
+    sqlx::query(format!("SET search_path to {};", schema_name).as_ref())
+        .execute(&conn)
+        .await
+        .unwrap();
+    conn
 }
 
 pub async fn down(settings: Settings, test_id: String) {
