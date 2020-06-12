@@ -1,19 +1,21 @@
+pub mod db;
+
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
+use std::iter;
+
 use actix_http::Request;
 use actix_service::Service;
 use actix_web::dev::ServiceResponse;
 use actix_web::{test, App, Error};
 
 use paperclip::actix::OpenApiExt;
-pub mod db;
 
 use src::core::auth::Viewer;
+use src::core::db::PgConnection;
+use src::core::db::Pool;
 use src::core::http::middlewares;
 use src::core::settings::Settings;
-use std::iter;
-
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
-use sqlx::{PgConnection, Pool};
 
 pub async fn setup() -> (
     impl Service<Request = Request, Response = ServiceResponse, Error = Error>,

@@ -1,12 +1,13 @@
 use futures::future::{err, ok, Ready};
 
+use actix_web::dev::Payload;
+use actix_web::dev::PayloadStream;
+
 use crate::core::db::model::fields;
 use crate::core::http::errors;
 use crate::core::http::web;
 use crate::core::http::Apiv2Schema;
 use crate::core::http::FromRequest;
-use crate::core::http::Payload;
-use crate::core::http::PayloadStream;
 
 pub type ViewerId = Option<fields::Id>;
 

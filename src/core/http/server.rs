@@ -1,3 +1,10 @@
+use actix_web::App;
+use actix_web::HttpServer;
+use anyhow::Result;
+use listenfd::ListenFd;
+use paperclip::actix::OpenApiExt;
+
+use crate::core::auth::Viewer;
 use crate::core::db::init_db;
 use crate::core::settings::Settings;
 
@@ -5,14 +12,6 @@ use super::api_v2_operation;
 use super::guard;
 use super::middlewares;
 use super::web;
-use super::App;
-use super::HttpServer;
-use super::OpenApiExt;
-
-use crate::core::auth::Viewer;
-use anyhow::Result;
-
-use listenfd::ListenFd;
 
 #[api_v2_operation]
 async fn p404() -> Result<String, ()> {
