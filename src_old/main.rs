@@ -1,4 +1,4 @@
-#[macro_use]
+ac#[macro_use]
 extern crate log;
 
 use listenfd::ListenFd;

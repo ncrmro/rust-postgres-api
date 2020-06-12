@@ -1,6 +1,5 @@
-mod auth;
-mod model;
-mod routes;
+// mod auth;
+pub mod model;
+pub mod routes;
 
 pub use model::*;
-pub use routes::init;

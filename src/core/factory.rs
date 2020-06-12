@@ -2,6 +2,7 @@ use async_trait::async_trait;
 
 use super::db;
 
+/// A human being is represented here
 #[async_trait]
 pub trait ModelFactory {
     type Request;
