@@ -44,7 +44,7 @@ impl DatabaseModel<User, NewUser> for User {
         unimplemented!()
     }
 
-    async fn read(id: i32, db_conn: &PgPool) -> Result<User, db::Error> {
+    async fn get(id: i32, db_conn: &PgPool) -> Result<User, db::Error> {
         sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", id)
             .fetch_one(db_conn)
             .await

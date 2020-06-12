@@ -23,7 +23,7 @@ async fn viewer(
     db_pool: web::Data<PgPool>,
 ) -> Result<web::Json<User>, errors::Error> {
     if let Some(id) = viewer.id {
-        let viewer = User::read(id, &db_pool).await;
+        let viewer = User::get(id, &db_pool).await;
         match viewer {
             Ok(user) => Ok(web::Json(user)),
             Err(_err) => Err(errors::ErrorBadRequest("Not Authenticated")),

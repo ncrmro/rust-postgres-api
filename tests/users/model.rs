@@ -20,7 +20,7 @@ async fn test_model_create() {
 async fn test_model_get_by_id() {
     let (_srv, db_conn, test_name) = common::setup().await;
     let obj = user::UserFactory::create(db_conn.clone()).await;
-    let record = user::User::read(obj.id, &db_conn).await.unwrap();
+    let record = user::User::get(obj.id, &db_conn).await.unwrap();
 
     assert_eq!(obj.email, record.email);
     common::teardown(db_conn, test_name).await;
