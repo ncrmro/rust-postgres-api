@@ -26,9 +26,9 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        return ok(ViewerMiddleware {
+        ok(ViewerMiddleware {
             service: Arc::new(Mutex::new(service)),
-        });
+        })
     }
 }
 
@@ -48,11 +48,10 @@ where
     type Future = LocalBoxFuture<'static, Result<ServiceResponse<B>, Error>>;
 
     fn poll_ready(&mut self, ctx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        return self
-            .service
+        self.service
             .try_lock()
             .expect("AuthenticationMiddleware was called already")
-            .poll_ready(ctx);
+            .poll_ready(ctx)
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
