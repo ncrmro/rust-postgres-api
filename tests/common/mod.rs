@@ -6,9 +6,9 @@ use actix_web::{test, App, Error};
 use paperclip::actix::OpenApiExt;
 pub mod db;
 
-use planet_express::core::auth::Viewer;
-use planet_express::core::http::middlewares;
-use planet_express::core::settings::Settings;
+use src::core::auth::Viewer;
+use src::core::http::middlewares;
+use src::core::settings::Settings;
 use std::iter;
 
 use rand::distributions::Alphanumeric;

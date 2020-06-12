@@ -1,9 +1,7 @@
-extern crate fake;
-extern crate planet_express;
 use super::super::common;
-use planet_express::core::auth::ViewerModel;
-use planet_express::core::db::model::DatabaseModel;
-use planet_express::user;
+use src::core::auth::ViewerModel;
+use src::core::db::model::DatabaseModel;
+use src::user;
 
 #[actix_rt::test]
 async fn test_model_create() {

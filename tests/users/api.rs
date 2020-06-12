@@ -1,7 +1,7 @@
 use super::super::common;
 use actix_web::test;
-use planet_express::user::model::User;
-use planet_express::user::routes::AuthenticationResponse;
+use src::user::model::User;
+use src::user::routes::AuthenticationResponse;
 
 #[actix_rt::test]
 async fn test_auth_viewer_create() {

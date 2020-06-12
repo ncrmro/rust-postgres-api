@@ -1,7 +1,7 @@
 use fancy_regex::Regex;
 use futures::executor::block_on;
-use planet_express::core::settings::Settings;
-use sqlx::{query, Connect, Connection, PgConnection, PgPool, Pool};
+use src::core::db::{query, Connect, Connection, PgConnection, PgPool, Pool};
+use src::core::settings::Settings;
 use std::fs;
 use std::sync::Once;
 

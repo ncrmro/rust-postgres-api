@@ -1,7 +1,5 @@
-extern crate fake;
-extern crate planet_express;
-use anyhow::Result;
+extern crate planet_express as src;
 
-fn main() -> Result<()> {
-    planet_express::init()
+fn main() -> anyhow::Result<()> {
+    src::init()
 }
