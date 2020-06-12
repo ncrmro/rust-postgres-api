@@ -1,2 +1,2 @@
-[database]
-sslmode= true
+#[database]
+#sslmode= false
