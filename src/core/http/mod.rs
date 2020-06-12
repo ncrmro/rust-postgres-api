@@ -3,8 +3,6 @@ pub mod server;
 
 pub use actix_web::dev::Payload;
 pub use actix_web::dev::PayloadStream;
-pub use actix_web::error::Error;
-pub use actix_web::error::ErrorBadRequest;
 pub use actix_web::guard;
 pub use actix_web::FromRequest;
 
@@ -16,3 +14,8 @@ pub use server::server;
 
 pub(super) use actix_web::App;
 pub(super) use actix_web::HttpServer;
+
+pub mod errors {
+    pub use actix_web::error::Error;
+    pub use actix_web::error::ErrorBadRequest;
+}

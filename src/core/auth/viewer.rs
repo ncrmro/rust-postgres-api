@@ -1,10 +1,9 @@
 use futures::future::{err, ok, Ready};
 
 use crate::core::db::model::fields;
+use crate::core::http::errors;
 use crate::core::http::web;
 use crate::core::http::Apiv2Schema;
-use crate::core::http::Error;
-use crate::core::http::ErrorBadRequest;
 use crate::core::http::FromRequest;
 use crate::core::http::Payload;
 use crate::core::http::PayloadStream;
@@ -17,7 +16,7 @@ pub struct Viewer {
 }
 
 impl FromRequest for Viewer {
-    type Error = Error;
+    type Error = errors::Error;
     type Future = Ready<Result<Self, Self::Error>>;
     type Config = ();
 
@@ -27,7 +26,9 @@ impl FromRequest for Viewer {
         if let Some(viewer) = viewer {
             ok(*viewer)
         } else {
-            err(ErrorBadRequest("This password or username is incorrect."))
+            err(errors::ErrorBadRequest(
+                "This password or username is incorrect.",
+            ))
         }
     }
 }

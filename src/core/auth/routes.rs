@@ -4,10 +4,9 @@ use super::User;
 use crate::core::auth::ViewerModel;
 use crate::core::db::PgPool;
 use crate::core::http::api_v2_operation;
+use crate::core::http::errors;
 use crate::core::http::web;
 use crate::core::http::Apiv2Schema;
-use crate::core::http::Error;
-use crate::core::http::ErrorBadRequest;
 
 use crate::core::db::model::DatabaseModel;
 
@@ -22,15 +21,15 @@ async fn viewer(
     _req: web::HttpRequest,
     viewer: super::Viewer,
     db_pool: web::Data<PgPool>,
-) -> Result<web::Json<User>, Error> {
+) -> Result<web::Json<User>, errors::Error> {
     if let Some(id) = viewer.id {
         let viewer = User::read(id, &db_pool).await;
         match viewer {
             Ok(user) => Ok(web::Json(user)),
-            Err(_err) => Err(ErrorBadRequest("Not Authenticated")),
+            Err(_err) => Err(errors::ErrorBadRequest("Not Authenticated")),
         }
     } else {
-        Err(ErrorBadRequest("Not Authenticated"))
+        Err(errors::ErrorBadRequest("Not Authenticated"))
     }
 }
 
@@ -53,7 +52,7 @@ async fn create(
 async fn authenticate(
     user: web::Json<super::LoginUser>,
     db_pool: web::Data<PgPool>,
-) -> Result<web::Json<AuthenticationResponse>, Error> {
+) -> Result<web::Json<AuthenticationResponse>, errors::Error> {
     let row = super::User::find_user_by_credentials(
         user.email.clone(),
         user.password.clone(),
@@ -69,7 +68,7 @@ async fn authenticate(
         };
         Ok(web::Json(res))
     } else {
-        Err(ErrorBadRequest("Not Authenticated"))
+        Err(errors::ErrorBadRequest("Not Authenticated"))
     }
 }
 
