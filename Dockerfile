@@ -1,6 +1,5 @@
 FROM debian:buster-slim
 ENV APP_ENV=production
-WORKDIR /app
 RUN apt update && apt install libssl1.1
 RUN useradd -m pexp
 USER pexp
