@@ -2,6 +2,7 @@ pub mod middlewares;
 pub mod server;
 
 pub use actix_web::dev::Payload;
+pub use actix_web::dev::PayloadStream;
 pub use actix_web::error::Error;
 pub use actix_web::error::ErrorBadRequest;
 pub use actix_web::guard;
