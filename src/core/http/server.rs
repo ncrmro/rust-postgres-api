@@ -19,6 +19,8 @@ async fn p404() -> Result<String, ()> {
 }
 
 pub async fn server(settings: Settings, routes: fn(&mut web::ServiceConfig)) -> Result<()> {
+    info!("Initializing server");
+
     // this will enable us to keep application running during recompile: systemfd --no-pid -s http::5000 -- cargo watch -x run
     let mut listenfd = ListenFd::from_env();
 

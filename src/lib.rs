@@ -30,8 +30,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
 #[actix_rt::main]
 pub async fn init() -> Result<()> {
     env_logger::from_env(Env::default().default_filter_or("info")).init();
-
-    info!("Starting server");
     let settings = core::settings::Settings::new().unwrap();
     core::http::server(settings, routes).await?;
     Ok(())

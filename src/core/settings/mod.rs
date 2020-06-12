@@ -48,18 +48,14 @@ impl Settings {
 
         let mut settings = Config::default();
 
-        //         Start off by merging in the "default" configuration file
+        // Start off by merging in the "default" configuration file
         settings.merge(File::with_name("config/default").required(false))?;
 
         // Add in the current environment file
         // Default to 'development' env
         // Note that this file is _optional_
         let env = env::var("APP_ENV").unwrap_or_else(|_| "development".into());
-        info!("Environment is {:?}", env);
-        println!(
-            "Settings file: {:?}",
-            File::with_name(&format!("config/{}", env)).required(false)
-        );
+        info!("Currently running as {:?} environment", env);
         settings.merge(File::with_name(&format!("config/{}", env)).required(false))?;
 
         // Add in a local configuration file
