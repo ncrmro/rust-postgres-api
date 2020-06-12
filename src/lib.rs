@@ -1,3 +1,10 @@
+#![warn(
+    clippy::style,
+    clippy::correctness,
+    clippy::complexity,
+    clippy::perf,
+    clippy::cargo
+)]
 #[macro_use]
 extern crate log;
 #[macro_use]
