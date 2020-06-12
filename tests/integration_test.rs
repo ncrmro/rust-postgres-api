@@ -1,4 +1,4 @@
-extern crate planet_express;
+extern crate planet_express as src;
 
 mod common;
 mod users;

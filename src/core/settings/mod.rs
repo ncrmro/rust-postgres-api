@@ -2,25 +2,25 @@ use config::{Config, ConfigError, Environment, File};
 use dotenv::dotenv;
 use std::env;
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Database {
     pub database_url: String,
     pub sslmode: bool,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct HTTP {
     pub host: String,
     pub port: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct AUTH {
     pub jwt_secret: String,
     pub password_salt: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Settings {
     pub database: Database,
     pub http: HTTP,

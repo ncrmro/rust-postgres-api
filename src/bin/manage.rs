@@ -1,9 +1,11 @@
 use clap::Clap;
 use futures::executor::block_on;
+use planet_express::core::auth::ViewerModel;
 use planet_express::core::db::init_db;
 use planet_express::core::settings::Settings;
 use planet_express::init;
-use planet_express::user::{User, UserRequest};
+use planet_express::user::{NewUser, User};
+
 #[derive(Clap)]
 #[clap(version = "1.0", author = "Nicholas R. <ncrmro@gmail.com>")]
 struct Opts {
@@ -40,13 +42,12 @@ struct Createuser {
 //changeme
 async fn create_user(args: Createuser, settings: Settings) {
     let conn = init_db(&settings.database).await.unwrap();
-    let obj = UserRequest {
+    let obj = NewUser {
         email: args.email,
         password: args.password,
-        image: None,
     };
 
-    let r = User::create(obj, &conn).await;
+    let r = User::create_user(obj, &conn).await;
     match r {
         Ok(user) => println!("User successfully created {}", user.email),
         Err(e) => println!("{}", e),

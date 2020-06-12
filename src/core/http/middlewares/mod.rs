@@ -1,3 +1,2 @@
-pub mod viewer;
-
-pub use viewer::Viewer;
+pub use crate::core::auth::middleware::Viewer;
+pub(super) use actix_web::middleware::Logger;
