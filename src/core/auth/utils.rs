@@ -2,8 +2,8 @@ use crate::core::settings::Settings;
 use argon2::{self, Config};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use sqlx::types::chrono::Utc;
-/// Our claims struct, it needs to derive `Serialize` and/or `Deserialize`
-#[derive(Debug, Serialize, Deserialize)]
+
+#[derive(Serialize, Deserialize)]
 pub struct Claims {
     pub user_id: i32,
     pub exp: usize,

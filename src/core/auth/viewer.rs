@@ -10,7 +10,7 @@ use crate::core::http::PayloadStream;
 
 pub type ViewerId = Option<fields::Id>;
 
-#[derive(Serialize, Deserialize, Apiv2Schema, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Apiv2Schema, Copy, Clone)]
 pub struct Viewer {
     pub id: ViewerId,
 }

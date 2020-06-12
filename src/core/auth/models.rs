@@ -11,7 +11,7 @@ pub type UserId = fields::Id;
 
 type RepoError = Error;
 
-#[derive(Serialize, Deserialize, FromRow, Apiv2Schema, Debug, Clone)]
+#[derive(Serialize, Deserialize, FromRow, Apiv2Schema, Clone)]
 pub struct User {
     pub id: UserId,
     pub email: String,
