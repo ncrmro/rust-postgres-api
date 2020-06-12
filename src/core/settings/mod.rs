@@ -12,6 +12,7 @@ pub struct Database {
 pub struct HTTP {
     pub host: String,
     pub port: String,
+    pub threads: Option<i32>,
 }
 
 #[derive(Deserialize)]
@@ -54,6 +55,11 @@ impl Settings {
         // Default to 'development' env
         // Note that this file is _optional_
         let env = env::var("APP_ENV").unwrap_or_else(|_| "development".into());
+        info!("Environment is {:?}", env);
+        println!(
+            "Settings file: {:?}",
+            File::with_name(&format!("config/{}", env)).required(false)
+        );
         settings.merge(File::with_name(&format!("config/{}", env)).required(false))?;
 
         // Add in a local configuration file

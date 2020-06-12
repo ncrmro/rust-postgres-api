@@ -44,6 +44,10 @@ pub async fn server(settings: Settings, routes: fn(&mut web::ServiceConfig)) -> 
             )
     });
 
+    if settings.http.threads.is_some() {
+        server = server.workers(settings.http.threads.unwrap() as usize);
+    }
+
     server = match listenfd.take_tcp_listener(0)? {
         Some(listener) => server.listen(listener)?,
         None => server.bind(format!(
