@@ -47,7 +47,7 @@ async fn create(
             };
             Ok(web::Json(res))
         }
-        Err(e) => Err(ErrorConflict("user-exists")),
+        Err(_e) => Err(ErrorConflict("user-exists")),
     }
 }
 
