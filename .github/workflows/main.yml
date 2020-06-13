@@ -27,7 +27,7 @@ jobs:
       - name: Lint
         run: cargo clippy -- -D warnings
         env:
-          DATABASE_URL: 'postgres://postgres:postgres@postgres:${{ job.services.postgres.ports[5432] }}/postgres'
+          DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Test
         run: cargo test
         env:
