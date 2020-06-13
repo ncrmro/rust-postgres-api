@@ -4,112 +4,98 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:12.3-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
       - uses: actions/cache@v2
         with:
-          path: ./cache/cargo
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v2
-        with:
-          path: ./cache/target
-          key: ${{ runner.os }}-target-debug-${{ hashFiles('**/Cargo.lock') }}
-      - name: Docker complains if .env not present
-        run: cp .env.example .env
-      - name: Pull images
-        run: docker-compose pull
-      - name: Bring up the database
-        run: docker-compose up -d db
-      - name: Migrate database
-        run: docker-compose up --exit-code-from migrations migrations
-      - name: Make cache dirs to stop fails
-        run: mkdir -p cache/cargo && mkdir -p cache/target
-      - name: Load cache
-        run: >
-          docker-compose run --rm
-          -v planet-express_cargo-cache:/cache/cargo
-          -v planet-express_target-cache:/cache/target
-          -v $(pwd)/cache:/in
-          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
-      - name: Clone test DB to avoid panics from each test trying to create database, no cli to fix no tty
-        run: docker-compose exec -T db bash -c 'psql -U pexp -c "CREATE DATABASE pexp_test WITH TEMPLATE pexp OWNER pexp"'
       - name: Lint
-        run: docker-compose run app cargo clippy -- -D warnings
+        run: cargo clippy -- -D warnings
+        env:
+          DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
       - name: Test
-        run: docker-compose run app cargo test
-      - name: Download cache out of container
-        run: >
-          docker-compose run --rm
-          -v planet-express_cargo-cache:/cache/cargo
-          -v planet-express_target-cache:/cache/target
-          -v $(pwd)/cache:/out
-          tests sh -c "rsync -aW --no-compress /usr/local/cargo/ /out/cargo && rsync -a /app/target/ /out/target"
-      - name: Chown cache files
-        run: sudo chown -R "$(whoami)" $(pwd)/cache
-  build:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    needs: test
-    env:
-      HEROKU_APP: planetexpres
-      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      IMAGE_BASE: registry.heroku.com/planetexpres
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: ./cache/cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v2
-        with:
-          path: ./cache/target
-          key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
-      - name: Docker compose version
-        run: docker-compose version
-      - name: ls
-        run: ls
-      - name: Docker complains if .env not present
-        run: cp .env.example .env
-      - name: Pull images
-        run: docker-compose pull
-      - name: Bring up the database
-        run: docker-compose up -d db
-      - name: Migrate database
-        run: docker-compose run migrations
-      - name: Make cache dirs to stop fails
-        run: mkdir -p cache/cargo && mkdir -p cache/target
-      - name: Load cache
-        run: >
-          docker-compose run --rm
-          -v planet-express_cargo-cache:/cache/cargo
-          -v planet-express_target-cache:/cache/target
-          -v $(pwd)/cache:/in
-          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
-      - name: Compile binary
-        run: docker-compose run app cargo build --release
-      - name: Compile manage binary
-        run: docker-compose run app cargo build --release --bin manage
-      - name: Download cache out of container, as we also need binarys for docker build
-        run: >
-          docker-compose run --rm
-          -v planet-express_cargo-cache:/cache/cargo
-          -v planet-express_target-cache:/cache/target
-          -v $(pwd)/cache:/out
-          tests sh -c "rsync -aW --no-compress /usr/local/cargo/ /out/cargo && rsync -a /app/target/ /out/target"
-      - name: Chown cache files
-        run: sudo chown -R "$(whoami)" $(pwd)/cache
-      - name: Build release image
-        run: docker build --tag web . && docker tag web $IMAGE_BASE/web
-      - name: Set up Heroku
-        run: sudo apt update && sudo apt install curl -y && sudo curl https://cli-assets.heroku.com/install.sh | sh
-      - name: Sign into heroku container registry
-        run: heroku container:login
-      - name: Push release image
-        run: docker push registry.heroku.com/planetexpres/web
-      - name: Release new image
-        run: heroku container:release web
-      - name: Run migrations
-        run: heroku run bash -c "cd / && sqlx mig run"
-      - name: Chown cache files
-        run: sudo chown -R "$(whoami)" $(pwd)/cache
+        run: cargo test
+
+#  build:
+#    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/master'
+#    needs: test
+#    env:
+#      HEROKU_APP: planetexpres
+#      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+#      IMAGE_BASE: registry.heroku.com/planetexpres
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/cache@v2
+#        with:
+#          path: |
+#            ~/.cargo/registry
+#            ~/.cargo/git
+#            target
+#          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+#      - name: Docker compose version
+#        run: docker-compose version
+#      - name: ls
+#        run: ls
+#      - name: Docker complains if .env not present
+#        run: cp .env.example .env
+#      - name: Pull images
+#        run: docker-compose pull
+#      - name: Bring up the database
+#        run: docker-compose up -d db
+#      - name: Migrate database
+#        run: docker-compose run migrations
+#      - name: Make cache dirs to stop fails
+#        run: mkdir -p cache/cargo && mkdir -p cache/target
+#      - name: Load cache
+#        run: >
+#          docker-compose run --rm
+#          -v planet-express_cargo-cache:/cache/cargo
+#          -v planet-express_target-cache:/cache/target
+#          -v $(pwd)/cache:/in
+#          app sh -c "cp -a /in/target/. /cache/target && cp -a /in/cargo/. /cache/cargo"
+#      - name: Compile binary
+#        run: docker-compose run app cargo build --release
+#      - name: Compile manage binary
+#        run: docker-compose run app cargo build --release --bin manage
+#      - name: Download cache out of container, as we also need binarys for docker build
+#        run: >
+#          docker-compose run --rm
+#          -v planet-express_cargo-cache:/cache/cargo
+#          -v planet-express_target-cache:/cache/target
+#          -v $(pwd)/cache:/out
+#          tests sh -c "rsync -aW --no-compress /usr/local/cargo/ /out/cargo && rsync -a /app/target/ /out/target"
+#      - name: Chown cache files
+#        run: sudo chown -R "$(whoami)" $(pwd)/cache
+#      - name: Build release image
+#        run: docker build --tag web . && docker tag web $IMAGE_BASE/web
+#      - name: Set up Heroku
+#        run: sudo apt update && sudo apt install curl -y && sudo curl https://cli-assets.heroku.com/install.sh | sh
+#      - name: Sign into heroku container registry
+#        run: heroku container:login
+#      - name: Push release image
+#        run: docker push registry.heroku.com/planetexpres/web
+#      - name: Release new image
+#        run: heroku container:release web
+#      - name: Run migrations
+#        run: heroku run bash -c "cd / && sqlx mig run"
+#      - name: Chown cache files
+#        run: sudo chown -R "$(whoami)" $(pwd)/cache
 
