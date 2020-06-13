@@ -2,7 +2,6 @@ use anyhow::Result;
 
 use super::User;
 use crate::core::auth::ViewerModel;
-use crate::core::db::Error as DatabaseError;
 use crate::core::db::PgPool;
 use crate::core::http::api_v2_operation;
 use crate::core::http::errors::*;
