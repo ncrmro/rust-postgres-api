@@ -25,7 +25,7 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Run Migrations, Much quicker to use docker image with prebuilt binary atm.
-        uses: docker run -e DATABASE_URL=$DATABASE_URL --network=host ncrmro/rust:sqlx sqlx migrations run
+        run: docker run -e DATABASE_URL=$DATABASE_URL --network=host ncrmro/rust:sqlx sqlx migrations run
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Lint
