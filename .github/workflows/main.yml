@@ -69,11 +69,11 @@ jobs:
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Compile binary
-        run: docker-compose run app cargo build --release
+        run: cargo build --release
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Compile manage binary
-        run: docker-compose run app cargo build --release --bin manage
+        run: cargo build --release --bin manage
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Build release image
