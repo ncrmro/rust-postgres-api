@@ -24,6 +24,10 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install sqlx
+        run: cargo install --git https://github.com/launchbadge/sqlx.git --rev a9fb19b37da0e77fd891b8a2358733c563115a5c cargo-sqlx
+      - name: Run migrations
+        run: sqlx migrate run
       - name: Lint
         run: cargo clippy -- -D warnings
         env:
