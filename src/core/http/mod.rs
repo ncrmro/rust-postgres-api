@@ -11,6 +11,5 @@ pub use paperclip::actix::Apiv2Schema;
 pub use server::server;
 
 pub mod errors {
-    pub use actix_web::error::Error;
-    pub use actix_web::error::ErrorBadRequest;
+    pub use actix_web::error::*;
 }
