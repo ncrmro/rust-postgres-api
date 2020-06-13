@@ -1,7 +1,7 @@
-use std::{error, fmt};
+use core::types::user::*;
 use core::types::RepoError;
 use std::error::Error as StdError;
-use core::types::user::*;
+use std::{error, fmt};
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterUserInput {

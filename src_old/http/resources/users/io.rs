@@ -1,19 +1,19 @@
-use crate::core::types::user::User;
 use crate::core::types::io::get_current_user::*;
-use crate::core::types::io::register_user::*;
 use crate::core::types::io::login_user::*;
-use rocket::{Data, Outcome, Request};
-use rocket::http::Status;
+use crate::core::types::io::register_user::*;
+use crate::core::types::user::User;
 use rocket::data::{self, FromData};
+use rocket::http::Status;
+use rocket::{Data, Outcome, Request};
 use rocket_contrib::json;
 
-use rocket::response::{Responder, Response};
+use crate::http::api::ApiResult;
 use crate::http::errors::io::*;
 use chrono::Local;
-use rocket::response;
 use rocket;
+use rocket::response;
+use rocket::response::{Responder, Response};
 use serde_json;
-use crate::http::api::ApiResult;
 
 //@TODO: Remove unnecessary derive from entire codebase
 #[derive(Serialize, Deserialize, Debug)]
@@ -86,8 +86,9 @@ impl<'r> Responder<'r> for ApiResult<CurrentUserOutput, CurrentUserError> {
 
         match self.0 {
             Ok(output) => {
-                build
-                    .merge(response::content::Json(serde_json::to_string(&output)).respond_to(req)?);
+                build.merge(
+                    response::content::Json(serde_json::to_string(&output)).respond_to(req)?,
+                );
                 build.status(Status::Ok).ok()
             }
             Err(err) => {
@@ -114,7 +115,8 @@ impl<'r> Responder<'r> for ApiResult<CurrentUserOutput, CurrentUserError> {
                     },
                 };
                 build.merge(
-                    response::content::Json(serde_json::to_string(&err_response)).respond_to(req)?,
+                    response::content::Json(serde_json::to_string(&err_response))
+                        .respond_to(req)?,
                 );
                 build.status(Status::BadRequest).ok()
             }
@@ -142,7 +144,6 @@ impl FromData for LoginUserInput {
     }
 }
 
-
 impl<'r> Responder<'r> for ApiResult<RegisterUserOutput, RegisterUserError> {
     fn respond_to(self, req: &Request) -> Result<rocket::Response<'r>, Status> {
         let date = Local::now();
@@ -151,8 +152,9 @@ impl<'r> Responder<'r> for ApiResult<RegisterUserOutput, RegisterUserError> {
 
         match self.0 {
             Ok(output) => {
-                build
-                    .merge(response::content::Json(serde_json::to_string(&output)).respond_to(req)?);
+                build.merge(
+                    response::content::Json(serde_json::to_string(&output)).respond_to(req)?,
+                );
                 build.status(Status::Ok).ok()
             }
             Err(err) => {
@@ -179,7 +181,8 @@ impl<'r> Responder<'r> for ApiResult<RegisterUserOutput, RegisterUserError> {
                     },
                 };
                 build.merge(
-                    response::content::Json(serde_json::to_string(&err_response)).respond_to(req)?,
+                    response::content::Json(serde_json::to_string(&err_response))
+                        .respond_to(req)?,
                 );
                 build.status(Status::BadRequest).ok()
             }
@@ -195,8 +198,9 @@ impl<'r> Responder<'r> for ApiResult<LoginUserOutput, LoginUserError> {
 
         match self.0 {
             Ok(output) => {
-                build
-                    .merge(response::content::Json(serde_json::to_string(&output)).respond_to(req)?);
+                build.merge(
+                    response::content::Json(serde_json::to_string(&output)).respond_to(req)?,
+                );
                 build.status(Status::Ok).ok()
             }
             Err(err) => {
@@ -233,7 +237,8 @@ impl<'r> Responder<'r> for ApiResult<LoginUserOutput, LoginUserError> {
                     },
                 };
                 build.merge(
-                    response::content::Json(serde_json::to_string(&err_response)).respond_to(req)?,
+                    response::content::Json(serde_json::to_string(&err_response))
+                        .respond_to(req)?,
                 );
                 build.status(Status::BadRequest).ok()
             }

@@ -18,12 +18,11 @@ async fn index() -> impl Responder {
 pub async fn main(settings: Settings) -> std::result::Result<(), std::io::Error> {
     HttpServer::new(move || {
         App::new()
-//             .data(init_db(&settings.database)) // pass database pool to application so we can access it inside handlers
+            //             .data(init_db(&settings.database)) // pass database pool to application so we can access it inside handlers
             .route("/", web::get().to(index))
-//             .configure(todo::init) // init todo routes
+        //             .configure(todo::init) // init todo routes
     })
     .bind("0.0.0.0:8000")?
     .run()
     .await
 }
-

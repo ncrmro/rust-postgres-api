@@ -1,32 +1,31 @@
 use core::types::RepoError;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct User {
-    pub username : String,
-    pub email : String,
-    pub password : String,
-    pub token : Option<String>,
-    pub bio : Option<String>,
-    pub image : Option<String>,
+    pub username: String,
+    pub email: String,
+    pub password: String,
+    pub token: Option<String>,
+    pub bio: Option<String>,
+    pub image: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NewUser {
-    pub username : String,
-    pub email : String,
-    pub password : String,
+    pub username: String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginUser {
-    pub email : String,
-    pub password : String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CurrentUser {
-    pub username : String,
+    pub username: String,
 }
 
 pub trait UserRepo {

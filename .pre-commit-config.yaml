@@ -3,4 +3,4 @@ repos:
     rev: c9d5fe3776c92519e0b7eb9175fb56400f2a518f
     hooks:
       - id: fmt
-#      - id: cargo-check
+      - id: clippy

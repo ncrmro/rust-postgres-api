@@ -1,21 +1,24 @@
-use core::types::user::*;
 use core::types::io::get_current_user::*;
+use core::types::user::*;
 
 pub fn get_current_user<U>(
     current_user: CurrentUser,
-    user_repo: &U
+    user_repo: &U,
 ) -> Result<CurrentUserOutput, CurrentUserError>
-where 
-    U: UserRepo
+where
+    U: UserRepo,
 {
     let user = user_repo.find_user_by_username(&current_user.username)?;
 
     println!("fetched user {:?}", user);
 
     if user.is_some() {
-        Ok(CurrentUserOutput { user: user.unwrap() })
+        Ok(CurrentUserOutput {
+            user: user.unwrap(),
+        })
     } else {
-        Err(CurrentUserError::InvalidInput(String::from("Invalid input.")))
+        Err(CurrentUserError::InvalidInput(String::from(
+            "Invalid input.",
+        )))
     }
-    
 }

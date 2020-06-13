@@ -1,8 +1,8 @@
+use chrono::Local;
+use http::errors::io::*;
+use rocket::Error;
 use rocket::Request;
 use rocket_contrib::Json;
-use rocket::Error;
-use http::errors::io::*;
-use chrono::Local;
 
 #[catch(400)]
 pub fn bad_request(_err: Error, req: &Request) -> Json<ErrorWrapper> {
