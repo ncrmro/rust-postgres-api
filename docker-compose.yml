@@ -8,7 +8,6 @@ x-app: &app-template
       TERM: xterm-256color
       APP_ENV: development
       DATABASE_URL: postgres://pexp:pexp@db:5432/pexp
-#      CARGO_HOME: /app/target/.cargo
     depends_on:
       - db
     volumes:
