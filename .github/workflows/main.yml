@@ -14,9 +14,6 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
       - uses: actions/cache@v2
         with:
           path: |
@@ -24,6 +21,9 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
       - name: Run Migrations, Much quicker to use docker image with prebuilt binary atm.
         run: docker run -e DATABASE_URL=$DATABASE_URL --network=host ncrmro/rust:sqlx sqlx migrations run
         env:
