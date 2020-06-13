@@ -24,10 +24,8 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install sqlx
-        run: cargo install --git https://github.com/launchbadge/sqlx.git --rev a9fb19b37da0e77fd891b8a2358733c563115a5c cargo-sqlx
-      - name: Run migrations
-        run: sqlx migrate run
+      - name: Run Migrations, Much quicker to use docker image with prebuilt binary atm.
+        uses: docker run -e DATABASE_URL=$DATABASE_URL --network=host ncrmro/rust:sqlx sqlx migrations run
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Lint
