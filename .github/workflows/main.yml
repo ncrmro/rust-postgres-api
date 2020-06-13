@@ -87,6 +87,6 @@ jobs:
       - name: Release new image
         run: heroku container:release web
       - name: Run migrations
-        run: heroku run sqlx migration run
+        run: heroku run sqlx migrate run
 
 
