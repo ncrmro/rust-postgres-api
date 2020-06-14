@@ -35,10 +35,12 @@ impl Settings {
         // These env vars are automatically set by Heroku
         // DATABASE_URL is also used by SQLx and is required a compile time to check SQL
         // Just simpler this way...
-        env::set_var(
-            "APP_DATABASE__DATABASE_URL",
-            env!("DATABASE_URL", "DATABASE_URL was not set"),
-        );
+
+        match env::var("DATABASE_URL") {
+            Ok(database_url) => env::set_var("APP_DATABASE__DATABASE_URL", database_url),
+            Err(_e) => (),
+        }
+
         // Same thing heroku mandates using the port at $PORT
         match env::var("PORT") {
             Ok(port) => env::set_var("APP_HTTP__PORT", port),
