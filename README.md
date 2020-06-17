@@ -3,12 +3,21 @@
 A REST API boilerplate written in Rust, heavily inspired by [Django](https://www.djangoproject.com).
 
 Table of contents
-
+- [Tech Overview](#technology-overview)
 - [Getting started](#getting-started)
   - [Docker](#docker)
   - [Locally](#locally)
 - [Creating a new migration](#database-migrations)
 - [Deployment](#deployment)
+
+## Technology Overview
+
+| Problem            | Solution                                                | Result                                                                                            |
+| ------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Database           | [Postgres](https://www.postgresql.org)                  | It's Postgres :)                                                                                  |
+| Rust SQL Toolkit   | [SQLx](https://github.com/launchbadge/sqlx)             | Query the database with compile timed SQL (no ORM!)                                               |
+| Webframework       | [Actix Web](https://github.com/actix/actix-web)         | Very fast web server                                                                              |
+| OpenAPI Generation | [Paperclip](https://github.com/wafflespeanut/paperclip) | Automatically generated specification of your API, which can be used to generate your API client. |
 
 ## TODO
 
