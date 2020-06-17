@@ -1,6 +1,7 @@
 extern crate planet_express as src;
 
 mod common;
+mod todos;
 mod users;
 
 use actix_web::test;

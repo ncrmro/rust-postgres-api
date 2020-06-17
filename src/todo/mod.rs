@@ -1,4 +1,5 @@
-mod model;
+pub mod factory;
+pub mod model;
 mod routes;
 
 pub use model::*;
