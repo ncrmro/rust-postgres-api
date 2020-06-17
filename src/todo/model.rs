@@ -15,7 +15,7 @@ pub struct TodoRequest {
 }
 
 // this struct will be used to represent database record
-#[derive(Serialize, FromRow, Apiv2Schema, Clone)]
+#[derive(Serialize, Deserialize, FromRow, Apiv2Schema, Clone, Debug)]
 pub struct Todo {
     pub id: i32,
     pub description: String,

@@ -32,11 +32,11 @@ async fn find(
     let result = model::Todo::get(id.into_inner(), db_pool.get_ref()).await;
     match result {
         Ok(todo) => Ok(Json(todo)),
-        _ => Err(()),
+        Err(e) => Err(()),
     }
 }
 
 // function that will be called on new Application to configure routes for this module
 pub fn init(cfg: &mut http::ServiceConfig) {
-    cfg.route("/todo", http::get().to(find));
+    cfg.route("/todo/{id}", http::get().to(find));
 }

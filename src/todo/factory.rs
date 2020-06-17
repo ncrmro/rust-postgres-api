@@ -3,8 +3,10 @@ use async_trait::async_trait;
 use super::model::{Todo as TodoModel, TodoRequest};
 use crate::core::db;
 use crate::core::db::model::DatabaseModel;
+use crate::core::factory::faker;
+use crate::core::factory::Fake;
 use crate::core::factory::ModelFactory;
-use fake::{faker::internet, Fake};
+use std::ops::Range;
 
 pub struct Todo;
 
@@ -12,7 +14,7 @@ pub struct Todo;
 impl ModelFactory<TodoModel, TodoRequest> for Todo {
     fn build() -> TodoRequest {
         TodoRequest {
-            description: "".to_string(),
+            description: faker::lorem::en::Sentence(Range { start: 0, end: 5 }).fake(),
             done: false,
         }
     }
