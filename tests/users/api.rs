@@ -22,7 +22,7 @@ async fn test_auth_viewer_create() {
         .to_request();
 
     // Test user already exists
-    let mut res = test::call_service(&mut srv, req).await;
+    let res = test::call_service(&mut srv, req).await;
 
     assert_eq!(res.status(), http::StatusCode::CONFLICT);
     common::teardown(db_conn, test_name).await;

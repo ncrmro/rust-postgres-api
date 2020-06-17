@@ -1,10 +1,8 @@
 use super::super::common;
-use actix_web::http;
 use actix_web::test;
 use src::core::factory::ModelFactory;
 use src::todo::factory;
 use src::todo::model;
-use src::user::routes::AuthenticationResponse;
 
 #[actix_rt::test]
 async fn test_get() {

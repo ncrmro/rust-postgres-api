@@ -2,7 +2,6 @@ use fancy_regex::Regex;
 use futures::executor::block_on;
 use src::core::db::{query, Connect, Connection, PgConnection, PgPool, Pool};
 use src::core::settings::Settings;
-use std::fs;
 use std::process::Command;
 use std::sync::Once;
 
