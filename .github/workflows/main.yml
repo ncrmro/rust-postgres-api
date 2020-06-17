@@ -30,7 +30,7 @@ jobs:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Copy test database as we don't have SQLx cli locally (takes forever to build atm)
         run: >
-           apt-get install postgresql-client && createdb -T postgres postgres_test
+           sudo apt-get install postgresql-client && createdb -T postgres postgres_test
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Lint
