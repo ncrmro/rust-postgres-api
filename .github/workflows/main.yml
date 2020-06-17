@@ -25,12 +25,12 @@ jobs:
         with:
           toolchain: stable
       - name: Run Migrations, Much quicker to use docker image with prebuilt binary atm.
-        run: docker run -e DATABASE_URL=$DATABASE_URL -v ${PWD}/migrations:/migrations --host=localhost --network=host ncrmro/rust:sqlx sqlx migrate run
+        run: docker run -e DATABASE_URL=$DATABASE_URL -v ${PWD}/migrations:/migrations --network=host ncrmro/rust:sqlx sqlx migrate run
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Copy test database as we don't have SQLx cli locally (takes forever to build atm)
         run: >
-           sudo apt-get install postgresql-client && createdb --port=${{ job.services.postgres.ports[5432] }} -T postgres postgres_test
+           sudo apt-get install postgresql-client && createdb --host=localhost --port=${{ job.services.postgres.ports[5432] }} -T postgres postgres_test
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       - name: Lint
