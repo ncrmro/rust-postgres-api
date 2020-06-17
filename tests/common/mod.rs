@@ -35,7 +35,7 @@ pub async fn setup() -> (
         .data(viewer)
         .wrap(middlewares::Viewer)
         .wrap_api()
-        .configure(planet_express::routes)
+        .configure(src::routes)
         .build();
 
     (test::init_service(app).await, db_conn, test_name)
