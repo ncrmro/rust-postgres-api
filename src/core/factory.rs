@@ -1,4 +1,6 @@
 use async_trait::async_trait;
+pub use fake::faker;
+pub use fake::Fake;
 
 use super::db;
 
