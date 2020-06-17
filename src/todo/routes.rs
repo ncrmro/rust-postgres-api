@@ -1,16 +1,17 @@
 use futures::future::{ready, Ready};
 
-use crate::core::db::PgPool;
-use crate::todo::Todo;
-use paperclip::actix::web::{self, get, Data, Json};
-
+use super::model;
 use crate::core::db::model::DatabaseModel;
+use crate::core::db::PgPool;
+use crate::core::http;
+use crate::core::http::api_v2_operation;
 use crate::core::http::errors::Error;
 use crate::core::http::HttpRequest;
 use crate::core::http::HttpResponse;
+use crate::core::http::Json;
 use crate::core::http::Responder;
 
-impl Responder for Todo {
+impl Responder for model::Todo {
     type Error = Error;
     type Future = Ready<Result<HttpResponse, Error>>;
 
@@ -23,8 +24,12 @@ impl Responder for Todo {
     }
 }
 
-async fn find(id: web::Path<i32>, db_pool: Data<PgPool>) -> Result<Json<Todo>, ()> {
-    let result = Todo::get(id.into_inner(), db_pool.get_ref()).await;
+#[api_v2_operation]
+async fn find(
+    id: http::Path<i32>,
+    db_pool: http::Data<PgPool>,
+) -> Result<Json<super::model::Todo>, ()> {
+    let result = model::Todo::get(id.into_inner(), db_pool.get_ref()).await;
     match result {
         Ok(todo) => Ok(Json(todo)),
         _ => Err(()),
@@ -32,6 +37,6 @@ async fn find(id: web::Path<i32>, db_pool: Data<PgPool>) -> Result<Json<Todo>, (
 }
 
 // function that will be called on new Application to configure routes for this module
-pub fn init(cfg: &mut web::ServiceConfig) {
-    cfg.route("/todo", get().to(find));
+pub fn init(cfg: &mut http::ServiceConfig) {
+    cfg.route("/todo", http::get().to(find));
 }
