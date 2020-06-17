@@ -3,6 +3,7 @@ use futures::executor::block_on;
 use src::core::db::{query, Connect, Connection, PgConnection, PgPool, Pool};
 use src::core::settings::Settings;
 use std::fs;
+use std::process::Command;
 use std::sync::Once;
 
 static START: Once = Once::new();
@@ -43,52 +44,23 @@ pub async fn create_testdb(settings: &Settings) {
         let test_url = format!("{}_test", settings.database.database_url);
         // Run migrations on test database
         conn = PgConnection::connect(&test_url).await.unwrap();
-        migrations(&mut conn).await;
+        migrations(settings).await;
     }
     conn.close().await.unwrap();
 }
 
-async fn migrations(mut conn: &mut PgConnection) {
-    let mut paths: Vec<_> = fs::read_dir("migrations")
-        .unwrap()
-        .map(|r| r.unwrap())
-        .collect();
-
-    query(
-        "
-create table __migrations
-(
-    migration varchar(255)                        not null
-        constraint __migrations_pkey
-            primary key,
-    created   timestamp default CURRENT_TIMESTAMP not null
-);
-        ",
-    )
-    .execute(&mut conn)
-    .await
-    .unwrap();
-    paths.sort_by_key(|dir| dir.path());
-
-    for path in paths {
-        let full_path = format!("{}", path.path().display());
-        let contents = fs::read_to_string(full_path).unwrap();
-
-        sqlx::query(contents.as_ref())
-            .execute(&mut conn)
-            .await
-            .unwrap();
-        sqlx::query(
-            format!(
-                "INSERT INTO __migrations (migration) VALUES ('{}');",
-                path.path().display()
-            )
-            .as_ref(),
-        )
-        .execute(&mut conn)
-        .await
+async fn migrations(settings: &Settings) {
+    // Migrations are organized this way to allow multiple statements in a file
+    let test_url = format!("{}_test", settings.database.database_url);
+    Command::new("sqlx")
+        .env("DATABASE_URL", test_url)
+        .arg("migrate")
+        .arg("run")
+        .spawn()
         .unwrap();
-    }
+    // Give the database a time to catch up
+    let ten_millis = std::time::Duration::from_secs(1);
+    std::thread::sleep(ten_millis);
 }
 
 async fn create_schema(mut conn: &mut PgConnection, name: String) -> String {
