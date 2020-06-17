@@ -3,12 +3,14 @@
 A REST API boilerplate written in Rust, heavily inspired by [Django](https://www.djangoproject.com).
 
 Table of contents
+
 - [Tech Overview](#technology-overview)
 - [Getting started](#getting-started)
   - [Docker](#docker)
   - [Locally](#locally)
 - [Creating a new migration](#database-migrations)
 - [Deployment](#deployment)
+- [Generating clients for your API](#generate-client-libraries-for-your-api)
 
 ## Technology Overview
 
@@ -141,3 +143,43 @@ Configure our secrets
 Finally release
 
 `heroku container:release web`
+
+## Generate Client libraries for your API
+
+With OpenAPI support we can generate clients based on our API. So if say we were building a React app we can
+automatically have our API translated into an API Client written in Javascript, Typescript orr any of the other generators available including rust!
+
+To get started, lets start our server and export our api spec to a file we can pass to the generator.
+
+`curl http://0.0.0.0:8000/api/spec.json > api-spec.json`
+
+Lets see what kinda of things we can generate with our api spec.
+
+```bash
+docker run openapitools/openapi-generator-cli:v4.3.0 list
+```
+
+You can see
+
+```
+CLIENT generators:
+    ...
+    - javascript
+```
+
+```bash
+docker run \
+-v ${PWD}/api-client:/local/out/javascript \
+-v ${PWD}/api-spec.json:/local/in/api-spec.json \
+openapitools/openapi-generator-cli:v4.3.0 generate \
+--input-spec /local/in/api-spec.json \
+--generator-name javascript \
+--output /local/out/javascript \
+--skip-validate-spec
+```
+
+If using typescript also add to the end
+
+`--additional-properties=typescriptThreePlus=true`
+
+It's best to have this committed in a different repo but generated whenever the the API is updated and built
