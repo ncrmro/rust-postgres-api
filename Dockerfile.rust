@@ -31,3 +31,14 @@ COPY --from=sqlx /usr/local/bin/sqlx /usr/local/bin/sqlx
 RUN rustup component add clippy
 RUN apt update && apt install rsync -y && rm -rf /var/lib/apt/lists/*
 CMD ["systemfd", "--no-pid", "-s", "http::0.0.0.0:8000", "--", "cargo", "watch", "--watch", "src", "--exec", "run"]
+
+
+###
+# Building the watcher image
+# docker build --target watcher --tag ncrmro/rust:watcher -f Dockerfile.rust .
+# docker push ncrmro/rust:watcher
+
+###
+# Building the sqlx image
+# docker build --target sqlx --tag ncrmro/rust:sqlx -f Dockerfile.rust .
+# docker push ncrmro/rust:sqlx
