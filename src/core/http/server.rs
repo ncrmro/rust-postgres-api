@@ -11,14 +11,13 @@ use crate::core::settings::Settings;
 use super::api_v2_operation;
 use super::guard;
 use super::middlewares;
-use super::web;
 
 #[api_v2_operation]
 async fn p404() -> Result<String, ()> {
     Ok("404".to_string())
 }
 
-pub async fn server(settings: Settings, routes: fn(&mut web::ServiceConfig)) -> Result<()> {
+pub async fn server(settings: Settings, routes: fn(&mut super::ServiceConfig)) -> Result<()> {
     info!("Initializing server");
 
     // this will enable us to keep application running during recompile: systemfd --no-pid -s http::5000 -- cargo watch -x run
@@ -39,10 +38,10 @@ pub async fn server(settings: Settings, routes: fn(&mut web::ServiceConfig)) -> 
             .build()
             .default_service(
                 // 404 for GET request
-                web::resource("")
-                    .route(web::get().to(p404))
+                super::resource("")
+                    .route(super::get().to(p404))
                     // all requests that are not `GET`
-                    .route(web::Route::new().guard(guard::Not(guard::Get()))),
+                    .route(super::Route::new().guard(guard::Not(guard::Get()))),
             )
     });
 

@@ -11,20 +11,20 @@ pub mod user;
 use anyhow::Result;
 use env_logger::Env;
 
+use crate::core::http;
 use crate::core::http::api_v2_operation;
-use crate::core::http::web;
 
 #[api_v2_operation]
 async fn index() -> Result<String, ()> {
     Ok("Hello World".to_string())
 }
 
-pub fn routes(cfg: &mut web::ServiceConfig) {
-    let v1 = web::scope("/v1")
+pub fn routes(cfg: &mut http::ServiceConfig) {
+    let v1 = http::scope("/v1")
         .configure(todo::init)
         .configure(core::auth::init);
 
-    cfg.route("/", web::get().to(index)).service(v1);
+    cfg.route("/", http::get().to(index)).service(v1);
 }
 
 #[actix_rt::main]

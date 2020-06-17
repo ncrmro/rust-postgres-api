@@ -3,9 +3,9 @@ use anyhow::Result;
 use super::User;
 use crate::core::auth::ViewerModel;
 use crate::core::db::PgPool;
+use crate::core::http;
 use crate::core::http::api_v2_operation;
 use crate::core::http::errors::*;
-use crate::core::http::web;
 use crate::core::http::Apiv2Schema;
 
 use crate::core::db::model::DatabaseModel;
@@ -18,14 +18,14 @@ pub struct AuthenticationResponse {
 
 #[api_v2_operation]
 async fn viewer(
-    _req: web::HttpRequest,
+    _req: http::HttpRequest,
     viewer: super::Viewer,
-    db_pool: web::Data<PgPool>,
-) -> Result<web::Json<User>, Error> {
+    db_pool: http::Data<PgPool>,
+) -> Result<http::Json<User>, Error> {
     if let Some(id) = viewer.id {
         let viewer = User::get(id, &db_pool).await;
         match viewer {
-            Ok(user) => Ok(web::Json(user)),
+            Ok(user) => Ok(http::Json(user)),
             Err(_err) => Err(ErrorBadRequest("Not Authenticated")),
         }
     } else {
@@ -35,9 +35,9 @@ async fn viewer(
 
 #[api_v2_operation]
 async fn create(
-    user: web::Json<super::NewUser>,
-    db_pool: web::Data<PgPool>,
-) -> Result<web::Json<AuthenticationResponse>, Error> {
+    user: http::Json<super::NewUser>,
+    db_pool: http::Data<PgPool>,
+) -> Result<http::Json<AuthenticationResponse>, Error> {
     let res = super::User::create_user(user.into_inner(), db_pool.get_ref()).await;
     match res {
         Ok(user) => {
@@ -45,7 +45,7 @@ async fn create(
                 user: user.clone(),
                 token: super::utils::jwt_get(user.id),
             };
-            Ok(web::Json(res))
+            Ok(http::Json(res))
         }
         Err(_e) => Err(ErrorConflict("user-exists")),
     }
@@ -53,9 +53,9 @@ async fn create(
 
 #[api_v2_operation]
 async fn authenticate(
-    user: web::Json<super::LoginUser>,
-    db_pool: web::Data<PgPool>,
-) -> Result<web::Json<AuthenticationResponse>, Error> {
+    user: http::Json<super::LoginUser>,
+    db_pool: http::Data<PgPool>,
+) -> Result<http::Json<AuthenticationResponse>, Error> {
     let row = super::User::find_user_by_credentials(
         user.email.clone(),
         user.password.clone(),
@@ -69,15 +69,15 @@ async fn authenticate(
             token: super::utils::jwt_get(user.id),
             user,
         };
-        Ok(web::Json(res))
+        Ok(http::Json(res))
     } else {
         Err(ErrorBadRequest("Not Authenticated"))
     }
 }
 
 // function that will be called on new Application to configure routes for this module
-pub fn init(cfg: &mut web::ServiceConfig) {
-    cfg.route("/viewer", web::get().to(viewer))
-        .route("/viewer/create", web::post().to(create))
-        .route("/viewer/authenticate", web::post().to(authenticate));
+pub fn init(cfg: &mut http::ServiceConfig) {
+    cfg.route("/viewer", http::get().to(viewer))
+        .route("/viewer/create", http::post().to(create))
+        .route("/viewer/authenticate", http::post().to(authenticate));
 }
