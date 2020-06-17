@@ -32,7 +32,7 @@ async fn find(
     let result = model::Todo::get(id.into_inner(), db_pool.get_ref()).await;
     match result {
         Ok(todo) => Ok(Json(todo)),
-        Err(e) => Err(()),
+        Err(_e) => Err(()),
     }
 }
 
