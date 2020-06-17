@@ -1,13 +1,14 @@
 # Planet-Express
 
+A REST API boilerplate written in Rust, heavily inspired by [Django](https://www.djangoproject.com).
+
 ## TODO
 
 - [ ] Testing - Unit
 - [x] Testing - Integration
-- [x] Docker Build
+- [ ] How to implement custom users with `core::auth`
+- [x] Develop locally or inside a docker container.
 - [x] Heroku Deployed Docker Container
-- [ ] Coverage
-- [ ] Sentry
 
 `d` and `dc` have been aliased to `docker` and `docker-compose`
 
@@ -51,6 +52,8 @@ If you haven't added a database yet run
 
 Finally release
 `heroku container:release web`
+
+## To build without using compose 
 
 ## Images
 We provide a few public images due to how like cargo-watcher and
