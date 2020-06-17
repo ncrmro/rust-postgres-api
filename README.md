@@ -52,32 +52,3 @@ If you haven't added a database yet run
 
 Finally release
 `heroku container:release web`
-
-## To build without using compose 
-
-## Images
-We provide a few public images due to how like cargo-watcher and
-
-### SQLx 
-Used by watcher and the final docker image, contains SQLx CLI binary.
-```bash
-docker build \
---target sqlx \
---tag ncrmro/rust:sqlx -f Dockerfile.rust .
-```
-
-`docker push ncrmro/rust:sqlx`
-
-### Watcher
-Has cargo-watch and sqlx binaries available.
-`docker build --target watcher --tag ncrmro/rust:watcher -f Dockerfile.rust .`
-
-`docker push ncrmro/rust:watcher`
-
-### Built Image
-To save time let the precached compose container build the image and
-copy binary directly from volume.
-
-```bash
-docker build --target built
-```
