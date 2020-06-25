@@ -13,8 +13,8 @@ use super::guard;
 use super::middlewares;
 
 #[api_v2_operation]
-async fn p404() -> Result<String, ()> {
-    Ok("404".to_string())
+async fn p404() -> Result<String, super::errors::Error> {
+    Err(super::errors::ErrorNotFound("Route not found"))
 }
 
 pub async fn server(settings: Settings, routes: fn(&mut super::ServiceConfig)) -> Result<()> {
